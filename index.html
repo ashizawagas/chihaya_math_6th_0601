@@ -531,4 +531,121 @@ function submitComparison(choice){
 checkAnswer(choice);
 }
 
-function checkAnswer(userAns
+function checkAnswer(userAns) {
+    if (userAns === ans) {
+        score++;
+        if (gameMode === 'practice') {
+            levelCorrectCount++;
+        } else {
+            qNum++;
+            totalQuestions++;
+        }
+        
+        $("monster").classList.add("correct");
+        setTimeout(() => $("monster").classList.remove("correct"), 1000);
+        setTimeout(nextQ, 1500);
+    } else {
+        if (gameMode === 'practice') {
+            levelCorrectCount = 0; // Reset level progress
+            $("practiceWrongMsg").style.display = "block";
+        } else {
+            showGameOver(); // Immediate game over in summary mode
+            return;
+        }
+        
+        $("monster").classList.add("wrong");
+        setTimeout(() => $("monster").classList.remove("wrong"), 1000);
+        
+        $("answerSections").style.display = "none";
+        $("comparisonInput").style.display = "none";
+        $("wrong").style.display = "block";
+        $("correctAnswerDisplay").style.display = "none";
+        
+        if (gameMode === 'practice') {
+            $("wrongMsg").textContent = "まちがいです。このレベルのカウントが0に戻ります。";
+        }
+    }
+}
+
+function retry() {
+    if (currentProblem.type === 'comparison') {
+        $("comparisonInput").style.display = "block";
+    } else {
+        $("answerSections").style.display = "flex";
+    }
+    $("wrong").style.display = "none";
+    $("correctAnswerDisplay").style.display = "none";
+    $("practiceWrongMsg").style.display = "none";
+    
+    // Clear inputs
+    $("numerator").value = "";
+    $("denominator").value = "";
+    $("mixedWhole").value = "";
+    $("mixedNumerator").value = "";
+    $("mixedDenominator").value = "";
+    $("normalAnswer").value = "";
+    
+    updateDisplay();
+    $("numerator").focus();
+}
+
+function next() {
+    displayCorrectAnswer();
+    setTimeout(() => {
+        if (gameMode === 'summary') {
+            qNum++;
+            totalQuestions++;
+        }
+        nextQ();
+    }, 2000);
+}
+
+function displayCorrectAnswer() {
+    let displayAnswer;
+    if (currentProblem.type === 'comparison') {
+        const choices = { 'left': '左の式', 'right': '右の式', 'equal': '同じ' };
+        displayAnswer = choices[ans];
+    } else {
+        // Convert ━ back to proper fraction display for answer
+        displayAnswer = ans.replace(/(\d+)━(\d+)/g, (match, num, den) => {
+            return formatFraction(num, den);
+        }) + (currentUnit || "");
+    }
+    $("correctAnswerText").innerHTML = displayAnswer;
+    $("correctAnswerDisplay").style.display = "block";
+}
+
+function showGameOver() {
+    $("game").style.display = "none";
+    $("gameover").style.display = "block";
+    $("finalLevel").textContent = level;
+    $("finalScore1").textContent = score;
+    
+    if (gameMode === 'summary') {
+        $("gameoverMsg").textContent = "一問でも間違えるとゲームオーバー！";
+    } else {
+        $("gameoverMsg").textContent = "練習を続けて頑張ろう！";
+    }
+}
+
+function showClear() {
+    $("game").style.display = "none";
+    $("clear").style.display = "block";
+    $("finalScore2").textContent = score;
+    document.body.classList.add("clear-screen");
+}
+
+function restart() {
+    location.reload();
+}
+
+// Event listeners for Enter key
+$("normalAnswer").addEventListener("keypress", e => { if (e.key === "Enter") submitNormal() });
+$("numerator").addEventListener("keypress", e => { if (e.key === "Enter") $("denominator").focus() });
+$("denominator").addEventListener("keypress", e => { if (e.key === "Enter") submitFraction() });
+$("mixedWhole").addEventListener("keypress", e => { if (e.key === "Enter") $("mixedNumerator").focus() });
+$("mixedNumerator").addEventListener("keypress", e => { if (e.key === "Enter") $("mixedDenominator").focus() });
+$("mixedDenominator").addEventListener("keypress", e => { if (e.key === "Enter") submitMixed() });
+</script>
+</body>
+</html>
