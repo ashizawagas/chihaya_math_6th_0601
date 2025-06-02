@@ -8,14 +8,27 @@ body{font-family:Arial,sans-serif;text-align:center;background:#f0f8ff;margin:0;
 .monster{font-size:80px;transition:transform 0.3s;margin:20px 0}
 .monster.level-up{animation:levelUp 2s}
 .monster.correct{animation:correct 1s}
+.monster.wrong{animation:wrong 1s}
 @keyframes levelUp{0%{transform:scale(1)}50%{transform:scale(2)rotate(180deg);color:#ff0}100%{transform:scale(1)rotate(360deg);color:gold}}
 @keyframes correct{0%{transform:scale(1)}50%{transform:scale(1.3);color:#0f0}100%{transform:scale(1);color:gold}}
+@keyframes wrong{0%{transform:scale(1)}25%{transform:scale(1.2)rotate(-10deg);color:#f00}50%{transform:scale(1.2)rotate(10deg);color:#f00}75%{transform:scale(1.2)rotate(-10deg);color:#f00}100%{transform:scale(1);color:#333}}
 .question{font-size:24px;margin:20px;padding:20px;background:white;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,0.1)}
 button{margin:10px;padding:12px 24px;font-size:16px;border:none;border-radius:8px;background:#4CAF50;color:white;cursor:pointer}
 button:hover{background:#45a049}
+.mode-btn{background:#2196f3;padding:15px 30px;font-size:18px;margin:20px}
+.mode-btn:hover{background:#1976d2}
+.mode-btn.practice{background:#ff9800}
+.mode-btn.practice:hover{background:#f57c00}
 input{font-size:18px;padding:10px;border:2px solid #ddd;border-radius:5px;margin:10px}
 .status{margin:15px 0;font-size:18px}
+.progress{background:#e0e0e0;border-radius:10px;margin:15px 0;height:20px;overflow:hidden}
+.progress-bar{height:100%;background:#4caf50;transition:width 0.3s}
+.progress-bar.practice{background:#ff9800}
+.progress-bar.summary{background:#f44336}
 .info{padding:15px;background:white;border-radius:10px;margin:15px 0}
+.mode-info{padding:10px;margin:10px 0;border-radius:8px;font-size:16px}
+.mode-info.practice{background:#fff3e0;color:#f57c00;border:2px solid #ff9800}
+.mode-info.summary{background:#ffebee;color:#d32f2f;border:2px solid #f44336}
 .clear-screen{background:linear-gradient(45deg,#ff9a9e,#fecfef);animation:rainbow 2s infinite}
 @keyframes rainbow{0%,100%{background:linear-gradient(45deg,#ff9a9e,#fecfef)}50%{background:linear-gradient(45deg,#a8e6cf,#dcedc1)}}
 .gameover{background:#ffebee;color:#d32f2f;padding:20px;border-radius:10px;margin:20px 0}
@@ -42,29 +55,55 @@ input{font-size:18px;padding:10px;border:2px solid #ddd;border-radius:5px;margin
 .fraction-display .numerator{display:block;line-height:1.2}
 .fraction-display .denominator{display:block;line-height:1.2}
 .fraction-display .fraction-bar{display:block;border-top:2px solid #333;margin:2px 0;min-width:30px}
+.level-indicator{display:flex;justify-content:center;gap:10px;margin:20px 0;flex-wrap:wrap}
+.level-dot{width:30px;height:30px;border-radius:50%;background:#e0e0e0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:bold}
+.level-dot.completed{background:#4caf50;color:white}
+.level-dot.current{background:#2196f3;color:white;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
 </style>
 </head>
 <body>
 <h1>🧮 千早算数クエスト - 6年生分数版</h1>
 
 <div id="start">
-<h2>小学6年生の分数をマスターしよう！</h2>
+<h2>モードを選択してください</h2>
 <div class="info">
-<p><strong>📚 内容：</strong>分数の計算・比較・文章題（9段階レベル制）</p>
-<p><strong>🎯 目標：</strong>レベル9でゲームクリア！各レベル5問ずつ</p>
-<p><strong>❤️ ルール：</strong>間違えると体力減少。体力0でゲーム終了</p>
-<p><strong>📝 注意：</strong>分数は必ず約分してから答えてください</p>
+<div class="mode-info practice">
+<h3>📚 練習モード</h3>
+<p>• 各レベルで5問連続正解で次のレベルへ</p>
+<p>• 間違えたらそのレベルのカウントが0に戻る</p>
+<p>• ライフ制度なし、何度でも挑戦可能</p>
 </div>
-<div>
+<div class="mode-info summary">
+<h3>🎯 まとめモード</h3>
+<p>• 全9レベル×各5問＝計45問に挑戦</p>
+<p>• 一問でも間違えるとゲームオーバー</p>
+<p>• 真の実力が試される緊張感あふれるモード</p>
+</div>
+</div>
+
+<button class="mode-btn practice" onclick="selectMode('practice')">練習モード</button>
+<button class="mode-btn" onclick="selectMode('summary')">まとめモード</button>
+
+<div style="margin-top:30px">
 <input type="number" id="grade" value="6" min="1" max="6" placeholder="学年">年
 <input type="number" id="class" min="1" max="10" placeholder="組">組
 <input type="number" id="number" min="1" max="40" placeholder="番号">番
 </div>
-<button onclick="start()">スタート</button>
 </div>
 
 <div id="game" style="display:none">
-<div class="info">レベル<span id="lv">1</span>/9 - <span id="lvInfo"></span></div>
+<div class="info">
+<div id="modeDisplay"></div>
+<div>レベル<span id="lv">1</span>/9 - <span id="lvInfo"></span></div>
+<div class="progress">
+<div class="progress-bar" id="progressBar"></div>
+</div>
+<div id="levelProgress"></div>
+</div>
+
+<div class="level-indicator" id="levelIndicator"></div>
+
 <div class="monster" id="monster">📊</div>
 <div class="question" id="q"></div>
 
@@ -111,23 +150,30 @@ input{font-size:18px;padding:10px;border:2px solid #ddd;border-radius:5px;margin
 </div>
 
 <div id="wrong" style="display:none">
-<p id="wrongMsg">まちがいです。もう一度考えてみましょう。</p>
+<p id="wrongMsg">まちがいです。</p>
 <div id="correctAnswerDisplay" class="correct-answer" style="display:none">
 <strong>正解：</strong><span id="correctAnswerText"></span>
 </div>
-<button onclick="retry()">もう一度</button>
-<button onclick="next()">つぎへ</button>
+<div id="practiceWrongMsg" style="display:none">
+<p>このレベルのカウントが0に戻ります。頑張って！</p>
 </div>
-<div class="status">スコア: <span id="score">0</span> | HP: <span id="hp">❤️❤️❤️</span></div>
+<button onclick="retry()" id="retryBtn">もう一度</button>
+<button onclick="next()" id="nextBtn">つぎへ</button>
+</div>
+
+<div class="status">
+<span id="statusText">スコア: <span id="score">0</span></span>
+<span id="totalQuestions" style="display:none"> / 45問中</span>
+</div>
 </div>
 
 <div id="gameover" style="display:none" class="gameover">
 <h1>ゲームオーバー</h1>
 <div class="monster" style="font-size:120px">😵</div>
-<h2>残念！体力が0になりました</h2>
+<h2 id="gameoverMsg">残念！</h2>
 <div class="info">
 <p>到達レベル: <span id="finalLevel"></span>/9</p>
-<p>獲得スコア: <span id="finalScore1"></span>点</p>
+<p>正解数: <span id="finalScore1"></span>問</p>
 </div>
 <button onclick="restart()">もう一度</button>
 </div>
@@ -136,15 +182,16 @@ input{font-size:18px;padding:10px;border:2px solid #ddd;border-radius:5px;margin
 <h1>🎉 ゲームクリア！ 🎉</h1>
 <div class="monster" style="font-size:120px">👑</div>
 <h2>おめでとう！全レベル制覇！</h2>
-<div class="info">最終スコア: <span id="finalScore2"></span>点</div>
+<div class="info">最終スコア: <span id="finalScore2"></span>問正解</div>
 <button onclick="restart()">もう一度</button>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
-let score=0,level=1,hp=3,ans,qNum=0,info="",currentProblem,currentUnit="";
+let score=0,level=1,ans,qNum=0,info="",currentProblem,currentUnit="",gameMode="",levelCorrectCount=0,totalQuestions=0;
 const monsters=["📊","🔢","✖️","🔄","⭐","⚖️","💡","🏃","👑"];
 const levelNames=["分数×整数","分数÷整数","分数×分数","帯分数×帯分数","分数×分数×分数","大小比較","逆数","時間の分数","分数の文章題"];
+const completedLevels=new Set();
 
 function gcd(a,b){return b?gcd(b,a%b):a}
 function simplify(n,d){const g=gcd(Math.abs(n),Math.abs(d));return[n/g,d/g]}
@@ -171,6 +218,71 @@ function formatMixedNumber(whole, numerator, denominator) {
         return `${whole}`;
     }
     return `${whole} ${formatFraction(numerator, denominator)}`;
+}
+
+function selectMode(mode) {
+    gameMode = mode;
+    const g = $("grade").value || "6";
+    const c = $("class").value || "？";
+    const n = $("number").value || "？";
+    info = `${g}年${c}組${n}番`;
+    
+    $("start").style.display = "none";
+    $("game").style.display = "block";
+    
+    score = 0;
+    level = 1;
+    qNum = 0;
+    levelCorrectCount = 0;
+    totalQuestions = 0;
+    completedLevels.clear();
+    
+    updateDisplay();
+    updateLevelIndicator();
+    nextQ();
+}
+
+function updateDisplay() {
+    $("lv").textContent = level;
+    $("lvInfo").textContent = levelNames[level - 1];
+    $("score").textContent = score;
+    $("monster").textContent = monsters[level - 1];
+    
+    const progressBar = $("progressBar");
+    
+    if (gameMode === 'practice') {
+        $("modeDisplay").innerHTML = '<div class="mode-info practice"><strong>📚 練習モード</strong></div>';
+        $("levelProgress").textContent = `このレベル: ${levelCorrectCount}/5問正解`;
+        progressBar.className = "progress-bar practice";
+        progressBar.style.width = `${(levelCorrectCount / 5) * 100}%`;
+        $("totalQuestions").style.display = "none";
+    } else {
+        $("modeDisplay").innerHTML = '<div class="mode-info summary"><strong>🎯 まとめモード</strong></div>';
+        $("levelProgress").textContent = `問題 ${totalQuestions + 1}/45`;
+        progressBar.className = "progress-bar summary";
+        progressBar.style.width = `${(totalQuestions / 45) * 100}%`;
+        $("totalQuestions").style.display = "inline";
+        $("totalQuestions").textContent = ` / 45問中`;
+    }
+}
+
+function updateLevelIndicator() {
+    const indicator = $("levelIndicator");
+    indicator.innerHTML = "";
+    
+    for (let i = 1; i <= 9; i++) {
+        const dot = document.createElement("div");
+        dot.className = "level-dot";
+        dot.textContent = i;
+        
+        if (completedLevels.has(i)) {
+            dot.classList.add("completed");
+        } else if (i === level) {
+            dot.classList.add("current");
+        }
+        
+        indicator.appendChild(dot);
+    }
 }
 
 function generateProblem(level){
@@ -292,79 +404,83 @@ return problems[rand(0,2)]();
 }
 }
 
-function start(){
-const g=$("grade").value||"6",c=$("class").value||"？",n=$("number").value||"？";
-info=`${g}年${c}組${n}番`;
-$("start").style.display="none";
-$("game").style.display="block";
-score=0;level=1;hp=3;qNum=0;
-updateDisplay();
-nextQ();
-}
+function nextQ() {
+    if (gameMode === 'practice') {
+        if (levelCorrectCount >= 5) {
+            completedLevels.add(level);
+            if (level >= 9) {
+                showClear();
+                return;
+            }
+            level++;
+            levelCorrectCount = 0;
+            $("monster").classList.add("level-up");
+            setTimeout(() => $("monster").classList.remove("level-up"), 2000);
+            updateLevelIndicator();
+        }
+    } else { // summary mode
+        if (level >= 9 && qNum >= 5) {
+            showClear();
+            return;
+        }
+        
+        if (qNum >= 5) {
+            completedLevels.add(level);
+            level++;
+            qNum = 0;
+            $("monster").classList.add("level-up");
+            setTimeout(() => $("monster").classList.remove("level-up"), 2000);
+            updateLevelIndicator();
+        }
+    }
 
-function updateDisplay(){
-$("lv").textContent=level;
-$("lvInfo").textContent=levelNames[level-1];
-$("score").textContent=score;
-$("hp").innerHTML="❤️".repeat(hp)||"💀";
-$("monster").textContent=monsters[level-1];
-}
+    currentProblem = generateProblem(level);
+    $("q").innerHTML = currentProblem.q;
+    ans = currentProblem.a;
+    currentUnit = currentProblem.unit || "";
 
-function nextQ(){
-if(qNum>=5){
-if(level>=9){showClear();return}
-level++;qNum=0;
-$("monster").classList.add("level-up");
-setTimeout(()=>$("monster").classList.remove("level-up"),2000);
-}
+    // Clear inputs
+    $("numerator").value = "";
+    $("denominator").value = "";
+    $("mixedWhole").value = "";
+    $("mixedNumerator").value = "";
+    $("mixedDenominator").value = "";
+    $("normalAnswer").value = "";
+    $("wrong").style.display = "none";
+    $("correctAnswerDisplay").style.display = "none";
 
-currentProblem=generateProblem(level);
-$("q").innerHTML=currentProblem.q;
-ans=currentProblem.a;
-currentUnit=currentProblem.unit||"";
+    // Show/hide answer sections based on problem type
+    if (currentProblem.type === 'comparison') {
+        $("answerSections").style.display = "none";
+        $("comparisonInput").style.display = "block";
+    } else {
+        $("answerSections").style.display = "flex";
+        $("comparisonInput").style.display = "none";
+    }
 
-// Clear inputs
-$("numerator").value="";
-$("denominator").value="";
-$("mixedWhole").value="";
-$("mixedNumerator").value="";
-$("mixedDenominator").value="";
-$("normalAnswer").value="";
-$("wrong").style.display="none";
-$("correctAnswerDisplay").style.display="none";
+    // Show mixed number section if allowed
+    if (currentProblem.allowMixed) {
+        $("mixedSection").style.display = "block";
+    } else {
+        $("mixedSection").style.display = "none";
+    }
 
-// Show/hide answer sections based on problem type
-if(currentProblem.type==='comparison'){
-$("answerSections").style.display="none";
-$("comparisonInput").style.display="block";
-}else{
-$("answerSections").style.display="flex";
-$("comparisonInput").style.display="none";
-}
+    // Show units if present
+    if (currentUnit) {
+        $("fractionUnit").textContent = currentUnit;
+        $("fractionUnit").style.display = "block";
+        $("mixedUnit").textContent = currentUnit;
+        $("mixedUnit").style.display = "block";
+        $("normalUnit").textContent = currentUnit;
+        $("normalUnit").style.display = "block";
+    } else {
+        $("fractionUnit").style.display = "none";
+        $("mixedUnit").style.display = "none";
+        $("normalUnit").style.display = "none";
+    }
 
-// Show mixed number section if allowed
-if(currentProblem.allowMixed){
-$("mixedSection").style.display="block";
-}else{
-$("mixedSection").style.display="none";
-}
-
-// Show units if present
-if(currentUnit){
-$("fractionUnit").textContent=currentUnit;
-$("fractionUnit").style.display="block";
-$("mixedUnit").textContent=currentUnit;
-$("mixedUnit").style.display="block";
-$("normalUnit").textContent=currentUnit;
-$("normalUnit").style.display="block";
-}else{
-$("fractionUnit").style.display="none";
-$("mixedUnit").style.display="none";
-$("normalUnit").style.display="none";
-}
-
-updateDisplay();
-$("numerator").focus();
+    updateDisplay();
+    $("numerator").focus();
 }
 
 function submitFraction(){
@@ -415,79 +531,4 @@ function submitComparison(choice){
 checkAnswer(choice);
 }
 
-function checkAnswer(userAns){
-if(userAns===ans){
-score++;qNum++;
-$("monster").classList.add("correct");
-setTimeout(()=>$("monster").classList.remove("correct"),1000);
-setTimeout(nextQ,1500);
-}else{
-hp--;
-if(hp<=0){
-showGameOver();
-}else{
-$("answerSections").style.display="none";
-$("comparisonInput").style.display="none";
-$("wrong").style.display="block";
-$("correctAnswerDisplay").style.display="none";
-}
-}
-}
-
-function retry(){
-if(currentProblem.type==='comparison'){
-$("comparisonInput").style.display="block";
-}else{
-$("answerSections").style.display="flex";
-}
-$("wrong").style.display="none";
-$("correctAnswerDisplay").style.display="none";
-$("numerator").focus();
-}
-
-function next(){
-displayCorrectAnswer();
-setTimeout(()=>{qNum++;nextQ()},2000);
-}
-
-function displayCorrectAnswer(){
-let displayAnswer;
-if(currentProblem.type==='comparison'){
-const choices={'left':'左の式','right':'右の式','equal':'同じ'};
-displayAnswer=choices[ans];
-}else{
-// Convert ━ back to proper fraction display for answer
-displayAnswer = ans.replace(/(\d+)━(\d+)/g, (match, num, den) => {
-    return formatFraction(num, den);
-}) + (currentUnit||"");
-}
-$("correctAnswerText").innerHTML=displayAnswer;
-$("correctAnswerDisplay").style.display="block";
-}
-
-function showGameOver(){
-$("game").style.display="none";
-$("gameover").style.display="block";
-$("finalLevel").textContent=level;
-$("finalScore1").textContent=score;
-}
-
-function showClear(){
-$("game").style.display="none";
-$("clear").style.display="block";
-$("finalScore2").textContent=score;
-document.body.classList.add("clear-screen");
-}
-
-function restart(){location.reload()}
-
-// Event listeners for Enter key
-$("normalAnswer").addEventListener("keypress",e=>{if(e.key==="Enter")submitNormal()});
-$("numerator").addEventListener("keypress",e=>{if(e.key==="Enter")$("denominator").focus()});
-$("denominator").addEventListener("keypress",e=>{if(e.key==="Enter")submitFraction()});
-$("mixedWhole").addEventListener("keypress",e=>{if(e.key==="Enter")$("mixedNumerator").focus()});
-$("mixedNumerator").addEventListener("keypress",e=>{if(e.key==="Enter")$("mixedDenominator").focus()});
-$("mixedDenominator").addEventListener("keypress",e=>{if(e.key==="Enter")submitMixed()});
-</script>
-</body>
-</html>
+function checkAnswer(userAns
