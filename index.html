@@ -1,304 +1,60 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>千早算数クエスト - 6年生分数版</title>
   <style>
-    body {
-      font-family: "Arial", sans-serif;
-      text-align: center;
-      background-color: #f0f8ff;
-      margin: 0;
-      padding: 20px;
-      overflow-x: hidden;
-    }
-    .monster {
-      font-size: 80px;
-      transition: transform 0.3s ease-in-out;
-      margin: 20px 0;
-      position: relative;
-      z-index: 10;
-    }
-    .monster.level-up {
-      animation: superLevelUpAnimation 3s ease-in-out;
-    }
-    
-    @keyframes superLevelUpAnimation {
-      0% { transform: scale(1) rotate(0deg); color: #000; text-shadow: none; }
-      25% { transform: scale(2) rotate(90deg); color: #ff0000; text-shadow: 0 0 30px #ff0000; }
-      50% { transform: scale(3.5) rotate(180deg); color: #0066ff; text-shadow: 0 0 60px #0066ff; }
-      75% { transform: scale(2.5) rotate(270deg); color: #ffff00; text-shadow: 0 0 40px #ffff00; }
+    body { font-family: Arial, sans-serif; text-align: center; background: #f0f8ff; margin: 0; padding: 20px; overflow-x: hidden; }
+    .monster { font-size: 80px; transition: transform 0.3s; margin: 20px 0; position: relative; z-index: 10; }
+    .monster.level-up { animation: levelUpAnim 3s ease-in-out; }
+    .monster.correct { animation: correctAnim 1.5s ease-in-out; }
+    @keyframes levelUpAnim {
+      0% { transform: scale(1) rotate(0deg); color: #000; }
+      25% { transform: scale(2) rotate(90deg); color: #f00; text-shadow: 0 0 30px #f00; }
+      50% { transform: scale(3.5) rotate(180deg); color: #00f; text-shadow: 0 0 60px #00f; }
+      75% { transform: scale(2.5) rotate(270deg); color: #ff0; text-shadow: 0 0 40px #ff0; }
       100% { transform: scale(1) rotate(360deg); color: gold; text-shadow: 0 0 10px gold; }
     }
-    
-    .fireworks {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 1;
+    @keyframes correctAnim {
+      0% { transform: scale(1); color: #000; }
+      50% { transform: scale(1.5) rotate(-10deg); color: #0f0; text-shadow: 0 0 20px #0f0; }
+      100% { transform: scale(1); color: gold; text-shadow: 0 0 10px gold; }
     }
-    
-    .firework {
-      position: absolute;
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      animation: fireworkAnimation 3s ease-out;
+    @keyframes firework { 0% { transform: scale(0); opacity: 1; } 50% { transform: scale(5); opacity: 0.8; } 100% { transform: scale(10); opacity: 0; } }
+    .fireworks { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+    .firework { position: absolute; width: 10px; height: 10px; border-radius: 50%; animation: firework 3s ease-out; }
+    .question, .score-details, .ranking-section { 
+      font-size: 32px; margin: 30px; padding: 25px; background: white; border-radius: 10px; 
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1); min-height: 80px; display: flex; align-items: center; 
+      justify-content: center; position: relative; z-index: 10; font-family: "Courier New", monospace; 
     }
-    
-    @keyframes fireworkAnimation {
-      0% { transform: scale(0); opacity: 1; }
-      50% { transform: scale(5); opacity: 0.8; }
-      100% { transform: scale(10); opacity: 0; }
+    .status { margin-top: 20px; font-size: 18px; position: relative; z-index: 10; }
+    button {
+      margin: 10px; padding: 15px 30px; font-size: 18px; border: none; border-radius: 8px; 
+      background: #4CAF50; color: white; cursor: pointer; transition: background 0.3s; position: relative; z-index: 10;
     }
-    
-    .correct-answer {
-      animation: correctAnswerAnimation 1.5s ease-in-out;
-    }
-    
-    @keyframes correctAnswerAnimation {
-      0% { transform: scale(1) rotate(0deg); color: #000; text-shadow: none; }
-      50% { transform: scale(1.5) rotate(-10deg); color: #00ff00; text-shadow: 0 0 20px #00ff00; }
-      100% { transform: scale(1) rotate(0deg); color: gold; text-shadow: 0 0 10px gold; }
-    }
-    
-    .question {
-      font-size: 32px;
-      margin: 30px;
-      padding: 25px;
-      background-color: white;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      min-height: 80px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      z-index: 10;
-      font-family: "Courier New", monospace;
-    }
-    .status {
-      margin-top: 20px;
-      font-size: 18px;
-      position: relative;
-      z-index: 10;
-    }
-    .start-btn, .restart-btn, button {
-      margin: 10px;
-      padding: 15px 30px;
-      font-size: 18px;
-      border: none;
-      border-radius: 8px;
-      background-color: #4CAF50;
-      color: white;
-      cursor: pointer;
-      transition: background-color 0.3s;
-      position: relative;
-      z-index: 10;
-    }
-    .start-btn:hover, .restart-btn:hover, button:hover {
-      background-color: #45a049;
-    }
-    .wrong-buttons button {
-      background-color: #ff6b6b;
-      margin: 5px;
-      padding: 10px 20px;
-      font-size: 16px;
-    }
-    .wrong-buttons button:hover {
-      background-color: #ff5252;
-    }
-    .next-button {
-      background-color: #3498db !important;
-    }
-    .next-button:hover {
-      background-color: #2980b9 !important;
-    }
-    #scoreBoard h2 {
-      font-size: 32px;
-      color: #2c3e50;
-    }
-    .score-details, #rankings {
-      font-size: 20px;
-      margin-top: 15px;
-      padding: 15px;
-      background-color: white;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    input[type="text"], input[type="number"] {
-      font-size: 20px;
-      padding: 12px;
-      border: 2px solid #ddd;
-      border-radius: 5px;
-      margin: 10px;
-      position: relative;
-      z-index: 10;
-      width: 120px;
-      text-align: center;
-    }
-    .difficulty-info {
-      font-size: 16px;
-      color: #666;
-      margin-top: 10px;
-      padding: 10px;
-      background-color: #f9f9f9;
-      border-radius: 5px;
-      position: relative;
-      z-index: 10;
-    }
-    .grade-info {
-      font-size: 18px;
-      color: #2c3e50;
-      margin-bottom: 20px;
-      font-weight: bold;
-      position: relative;
-      z-index: 10;
-    }
-    .game-description {
-      font-size: 18px;
-      color: #444;
-      margin: 20px 0;
-      padding: 20px;
-      background-color: white;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    
-    .input-form {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 20px;
-      margin: 20px 0;
-      flex-wrap: wrap;
-    }
-    
-    .input-group {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    
-    .input-group label {
-      font-size: 16px;
-      font-weight: bold;
-      margin-bottom: 5px;
-      color: #333;
-    }
-    
-    .input-group input {
-      width: 80px;
-      text-align: center;
-    }
-    
+    button:hover { background: #45a049; }
+    .wrong-buttons button { background: #ff6b6b; margin: 5px; padding: 10px 20px; font-size: 16px; }
+    .wrong-buttons button:hover { background: #ff5252; }
+    .next-button { background: #3498db !important; }
+    .next-button:hover { background: #2980b9 !important; }
+    input { font-size: 20px; padding: 12px; border: 2px solid #ddd; border-radius: 5px; margin: 10px; width: 120px; text-align: center; z-index: 10; }
+    .input-form { display: flex; justify-content: center; align-items: center; gap: 20px; margin: 20px 0; flex-wrap: wrap; }
+    .input-group { display: flex; flex-direction: column; align-items: center; }
+    .input-group label { font-size: 16px; font-weight: bold; margin-bottom: 5px; color: #333; }
+    .input-group input { width: 80px; }
     .character-collection {
-      position: fixed;
-      bottom: 10px;
-      left: 10px;
-      background-color: rgba(255, 255, 255, 0.9);
-      border-radius: 10px;
-      padding: 10px;
-      max-width: 300px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      z-index: 5;
+      position: fixed; bottom: 10px; left: 10px; background: rgba(255,255,255,0.9); border-radius: 10px; 
+      padding: 10px; max-width: 300px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 5;
     }
-    
-    .collection-title {
-      font-size: 14px;
-      font-weight: bold;
-      margin-bottom: 5px;
-      color: #333;
-    }
-    
-    .collected-characters {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 5px;
-    }
-    
-    .collected-character {
-      font-size: 24px;
-      padding: 5px;
-      border-radius: 5px;
-      background-color: #f0f8ff;
-      border: 2px solid #4CAF50;
-      animation: newCharacterAnimation 2s ease-in-out;
-    }
-    
-    @keyframes newCharacterAnimation {
-      0% { transform: scale(0) rotate(0deg); opacity: 0; }
-      50% { transform: scale(1.5) rotate(180deg); opacity: 1; }
-      100% { transform: scale(1) rotate(360deg); opacity: 1; }
-    }
-    
-    .ranking-section {
-      margin-top: 20px;
-      padding: 15px;
-      background-color: #fff3cd;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    
-    .ranking-title {
-      font-size: 22px;
-      color: #856404;
-      margin-bottom: 10px;
-      font-weight: bold;
-    }
-    
-    .ranking-item {
-      margin: 5px 0;
-      padding: 8px;
-      background-color: white;
-      border-radius: 5px;
-      font-size: 16px;
-    }
-    
-    .current-rank {
-      background-color: #d4edda !important;
-      border: 2px solid #28a745;
-      font-weight: bold;
-    }
-
-    .answer-section {
-      margin: 20px 0;
-    }
-
-    .answer-note {
-      font-size: 14px;
-      color: #666;
-      margin: 10px 0;
-    }
-
-    .fraction-input {
-      display: inline-block;
-      margin: 0 10px;
-    }
-
-    .fraction-input input {
-      width: 60px;
-      margin: 2px;
-    }
-
-    .fraction-slash {
-      font-size: 24px;
-      margin: 0 5px;
-    }
-
-    .correct-answer-display {
-      margin-top: 15px;
-      padding: 15px;
-      background-color: #d4edda;
-      border: 2px solid #28a745;
-      border-radius: 10px;
-      font-size: 18px;
-      font-weight: bold;
-      color: #155724;
-    }
+    .collected-characters { display: flex; flex-wrap: wrap; gap: 5px; }
+    .collected-character { font-size: 24px; padding: 5px; border-radius: 5px; background: #f0f8ff; border: 2px solid #4CAF50; }
+    .fraction-input { display: inline-block; margin: 0 10px; }
+    .fraction-input input { width: 60px; margin: 2px; }
+    .fraction-slash { font-size: 24px; margin: 0 5px; }
+    .correct-answer-display { margin-top: 15px; padding: 15px; background: #d4edda; border: 2px solid #28a745; border-radius: 10px; font-size: 18px; font-weight: bold; color: #155724; }
+    .game-clear { background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #f7b731); color: white; font-size: 48px; padding: 40px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+    .time-display { font-size: 24px; color: #2c3e50; margin: 20px 0; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -306,122 +62,91 @@
 
   <div id="startScreen">
     <h2>小学6年生の分数をマスターしよう！</h2>
-    <div class="game-description">
-      <p><strong>📚 問題の内容：</strong>分数のかけ算（分数×分数、分数×整数、3つの数）</p>
-      <p><strong>🎯 目標：</strong>5問正解でレベルアップ！モンスターをゲットしよう！</p>
-      <p><strong>❤️ ルール：</strong>間違えると体力が減るよ。体力が0になるとゲーム終了！</p>
-      <p><strong>📝 答え方：</strong>分数または小数で答えてね。分数は約分した形で！</p>
+    <div style="font-size:18px;color:#444;margin:20px 0;padding:20px;background:white;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,0.1);">
+      <p><strong>📚 問題:</strong>分数のかけ算 | <strong>🎯 目標:</strong>レベル10でゲームクリア！</p>
+      <p><strong>❤️ ルール:</strong>間違えると体力減少 | <strong>📝 答え方:</strong>分数または小数（約分必須）</p>
     </div>
-    <p>あなたの情報を入力してください</p>
     <div class="input-form">
-      <div class="input-group">
-        <label for="grade">学年</label>
-        <input type="number" id="grade" min="1" max="6" value="6">
-      </div>
-      <div class="input-group">
-        <label for="class">組</label>
-        <input type="number" id="class" min="1" max="10" placeholder="組">
-      </div>
-      <div class="input-group">
-        <label for="number">出席番号</label>
-        <input type="number" id="number" min="1" max="40" placeholder="番号">
-      </div>
+      <div class="input-group"><label>学年</label><input type="number" id="grade" min="1" max="6" value="6"></div>
+      <div class="input-group"><label>組</label><input type="number" id="class" min="1" max="10" placeholder="組"></div>
+      <div class="input-group"><label>出席番号</label><input type="number" id="number" min="1" max="40" placeholder="番号"></div>
     </div>
-    <br>
-    <button class="start-btn" onclick="startGame()">スタート</button>
+    <button onclick="startGame()">スタート</button>
   </div>
 
   <div id="game" style="display:none;">
-    <div class="grade-info">6年生の分数問題にチャレンジ中！</div>
+    <div class="time-display" id="timeDisplay">⏱️ 経過時間: 00:00</div>
+    <div style="font-size:18px;color:#2c3e50;margin-bottom:20px;font-weight:bold;">6年生の分数問題にチャレンジ中！</div>
     <div class="monster" id="monster">👾</div>
     <div class="question" id="question">問題を読み込み中...</div>
-    <div class="difficulty-info" id="difficultyInfo"></div>
-    <div id="answerSection" class="answer-section">
-      <div class="answer-note">分数で答える場合：</div>
+    <div style="font-size:16px;color:#666;margin-top:10px;padding:10px;background:#f9f9f9;border-radius:5px;" id="difficultyInfo"></div>
+    
+    <div id="answerSection" style="margin:20px 0;">
+      <div style="font-size:14px;color:#666;margin:10px 0;">分数で答える場合：</div>
       <div class="fraction-input">
         <input type="number" id="numerator" placeholder="分子">
         <span class="fraction-slash">/</span>
         <input type="number" id="denominator" placeholder="分母">
       </div>
-      <div class="answer-note">または小数で答える場合：</div>
+      <div style="font-size:14px;color:#666;margin:10px 0;">または小数で答える場合：</div>
       <input type="number" id="decimalAnswer" step="0.001" placeholder="小数で答え">
       <br><br>
       <button onclick="submitAnswer()">こたえる</button>
     </div>
+    
     <div id="wrongSection" style="display:none;" class="wrong-buttons">
       <p id="wrongMessage"></p>
       <div id="correctAnswerDisplay" class="correct-answer-display" style="display:none;"></div>
       <button onclick="retry()">ときなおす</button>
       <button onclick="nextQuestion()" class="next-button">つぎへ</button>
     </div>
+    
     <div class="status" id="status"></div>
     <div class="status" id="levelInfo"></div>
     
     <div class="character-collection" id="characterCollection" style="display:none;">
-      <div class="collection-title">🎁 ゲットしたモンスター</div>
+      <div style="font-size:14px;font-weight:bold;margin-bottom:5px;color:#333;">🎁 ゲットしたモンスター</div>
       <div class="collected-characters" id="collectedCharacters"></div>
     </div>
   </div>
 
   <div id="scoreBoard" style="display:none;">
-    <h2>🏆 スコアボード</h2>
+    <h2 id="scoreTitle">🏆 スコアボード</h2>
     <div class="score-details">
       <div><strong>学年・組・番号:</strong> <span id="displayName"></span></div>
-      <div><strong>学年:</strong> 6年生</div>
       <div><strong>正解数:</strong> <span id="finalScore">0</span></div>
+      <div><strong>クリア時間:</strong> <span id="clearTime">--:--</span></div>
       <div><strong>評価:</strong> <span id="rank">---</span></div>
     </div>
-    
     <div class="ranking-section">
-      <div class="ranking-title">🏅 ランキング</div>
+      <div style="font-size:22px;color:#856404;margin-bottom:10px;font-weight:bold;">🏅 ランキング</div>
       <div id="rankingList"></div>
     </div>
-    
-    <button class="restart-btn" onclick="restartGame()">もう一度あそぶ</button>
+    <button onclick="restartGame()">もう一度あそぶ</button>
   </div>
 
   <script>
     const el = id => document.getElementById(id);
-    let score = 0, level = 1, hp = 3, correctAnswer = {}, studentInfo = "";
+    let score = 0, level = 1, hp = 3, correctAnswer = {}, studentInfo = "", startTime, gameTimer;
     const monsters = ["👾", "🐉", "👹", "👺", "🧙‍♂️", "🦄", "🐲", "🦁", "🐯", "🐸", "🦊", "🐺", "🐨", "🐼", "🦘", "🐙"];
     let collectedMonsters = [];
 
-    // 最大公約数を求める関数
-    function gcd(a, b) {
-      return b === 0 ? a : gcd(b, a % b);
+    function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
+    function reduceFraction(num, den) { const g = gcd(Math.abs(num), Math.abs(den)); return { num: num / g, den: den / g }; }
+    function fractionToDecimal(num, den) { return num / den; }
+
+    function updateTimer() {
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+      const seconds = (elapsed % 60).toString().padStart(2, '0');
+      el("timeDisplay").textContent = `⏱️ 経過時間: ${minutes}:${seconds}`;
     }
 
-    // 分数を約分する関数
-    function reduceFraction(num, den) {
-      const g = gcd(Math.abs(num), Math.abs(den));
-      return { num: num / g, den: den / g };
-    }
-
-    // 分数を小数に変換
-    function fractionToDecimal(num, den) {
-      return num / den;
-    }
-
-    // 小数を分数に変換（近似）
-    function decimalToFraction(decimal, tolerance = 0.001) {
-      for (let den = 1; den <= 1000; den++) {
-        for (let num = 1; num <= den * 10; num++) {
-          if (Math.abs(num / den - decimal) < tolerance) {
-            return reduceFraction(num, den);
-          }
-        }
-      }
-      return null;
-    }
-
-    function getRankings() {
-      const rankings = JSON.parse(localStorage.getItem('fractionQuestRankings') || '[]');
-      return rankings.sort((a, b) => b.score - a.score);
-    }
-
-    function saveScore(name, score) {
+    function getRankings() { return JSON.parse(localStorage.getItem('fractionQuestRankings') || '[]').sort((a, b) => b.score - a.score); }
+    
+    function saveScore(name, score, time) {
       const rankings = getRankings();
-      rankings.push({ name, score, date: new Date().toLocaleDateString() });
+      rankings.push({ name, score, time, date: new Date().toLocaleDateString() });
       rankings.sort((a, b) => b.score - a.score);
       localStorage.setItem('fractionQuestRankings', JSON.stringify(rankings.slice(0, 10)));
       return rankings.slice(0, 10);
@@ -433,6 +158,7 @@
       const number = el("number").value || "？";
       
       studentInfo = `${grade}年${classNum}組${number}番`;
+      startTime = Date.now();
       
       el("startScreen").style.display = "none";
       el("game").style.display = "block";
@@ -441,9 +167,12 @@
       updateLevelDisplay();
       updateCharacterCollection();
       generateQuestion();
+      
+      gameTimer = setInterval(updateTimer, 1000);
     }
 
     function restartGame() {
+      clearInterval(gameTimer);
       el("startScreen").style.display = "block";
       el("scoreBoard").style.display = "none";
       el("game").style.display = "none";
@@ -451,7 +180,7 @@
     }
 
     function createEffect(isLevelUp = false) {
-      el("monster").classList.add(isLevelUp ? "level-up" : "correct-answer");
+      el("monster").classList.add(isLevelUp ? "level-up" : "correct");
       
       const fireworks = document.createElement('div');
       fireworks.className = 'fireworks';
@@ -468,13 +197,12 @@
           firework.style.left = Math.random() * 100 + '%';
           firework.style.top = Math.random() * 100 + '%';
           fireworks.appendChild(firework);
-          
           setTimeout(() => firework.remove(), isLevelUp ? 3000 : 1500);
         }, i * (isLevelUp ? 150 : 100));
       }
       
       setTimeout(() => {
-        el("monster").classList.remove(isLevelUp ? "level-up" : "correct-answer");
+        el("monster").classList.remove(isLevelUp ? "level-up" : "correct");
         fireworks.remove();
       }, isLevelUp ? 3000 : 1500);
     }
@@ -489,84 +217,53 @@
         charDiv.textContent = monster;
         charDiv.title = `レベル ${index + 1} でゲット！`;
         collectionDiv.appendChild(charDiv);
-        
-        if (index === collectedMonsters.length - 1 && collectedMonsters.length > 1) {
-          setTimeout(() => {
-            charDiv.style.animation = 'newCharacterAnimation 2s ease-in-out';
-          }, 100);
-        }
       });
       
       el("characterCollection").style.display = "block";
     }
 
     function generateQuestion() {
-      const questionType = Math.floor(Math.random() * 4); // 0-3の4パターン
+      const questionType = Math.floor(Math.random() * 4);
       let questionText = "";
       
       if (questionType === 0) {
-        // 分数 × 分数
-        const n1 = Math.floor(Math.random() * 9) + 1;
-        const d1 = Math.floor(Math.random() * 9) + 2;
-        const n2 = Math.floor(Math.random() * 9) + 1;
-        const d2 = Math.floor(Math.random() * 9) + 2;
-        
+        const n1 = Math.floor(Math.random() * 9) + 1, d1 = Math.floor(Math.random() * 9) + 2;
+        const n2 = Math.floor(Math.random() * 9) + 1, d2 = Math.floor(Math.random() * 9) + 2;
         correctAnswer = reduceFraction(n1 * n2, d1 * d2);
         questionText = `${n1}/${d1} × ${n2}/${d2} = ?`;
         el("difficultyInfo").textContent = "分数×分数の問題です";
-        
       } else if (questionType === 1) {
-        // 分数 × 整数
-        const n1 = Math.floor(Math.random() * 9) + 1;
-        const d1 = Math.floor(Math.random() * 9) + 2;
+        const n1 = Math.floor(Math.random() * 9) + 1, d1 = Math.floor(Math.random() * 9) + 2;
         const int = Math.floor(Math.random() * 9) + 2;
-        
         correctAnswer = reduceFraction(n1 * int, d1);
         questionText = `${n1}/${d1} × ${int} = ?`;
         el("difficultyInfo").textContent = "分数×整数の問題です";
-        
       } else if (questionType === 2) {
-        // 整数 × 分数
         const int = Math.floor(Math.random() * 9) + 2;
-        const n1 = Math.floor(Math.random() * 9) + 1;
-        const d1 = Math.floor(Math.random() * 9) + 2;
-        
+        const n1 = Math.floor(Math.random() * 9) + 1, d1 = Math.floor(Math.random() * 9) + 2;
         correctAnswer = reduceFraction(int * n1, d1);
         questionText = `${int} × ${n1}/${d1} = ?`;
         el("difficultyInfo").textContent = "整数×分数の問題です";
-        
       } else {
-        // 3つの数のかけ算
-        const n1 = Math.floor(Math.random() * 5) + 1;
-        const d1 = Math.floor(Math.random() * 5) + 2;
-        const n2 = Math.floor(Math.random() * 5) + 1;
-        const d2 = Math.floor(Math.random() * 5) + 2;
+        const n1 = Math.floor(Math.random() * 5) + 1, d1 = Math.floor(Math.random() * 5) + 2;
+        const n2 = Math.floor(Math.random() * 5) + 1, d2 = Math.floor(Math.random() * 5) + 2;
         const int = Math.floor(Math.random() * 5) + 2;
-        
         correctAnswer = reduceFraction(n1 * n2 * int, d1 * d2);
         questionText = `${n1}/${d1} × ${n2}/${d2} × ${int} = ?`;
         el("difficultyInfo").textContent = "3つの数のかけ算の問題です";
       }
       
       el("question").textContent = questionText;
-      
-      // 入力欄をクリア
-      el("numerator").value = "";
-      el("denominator").value = "";
-      el("decimalAnswer").value = "";
+      ["numerator", "denominator", "decimalAnswer"].forEach(id => el(id).value = "");
       el("numerator").focus();
-      
       el("answerSection").style.display = "block";
       el("wrongSection").style.display = "none";
-      
-      // 正解表示を隠す
       el("correctAnswerDisplay").style.display = "none";
     }
 
     function submitAnswer() {
       let isCorrect = false;
       
-      // 分数での回答をチェック
       const numerator = parseInt(el("numerator").value);
       const denominator = parseInt(el("denominator").value);
       
@@ -577,7 +274,6 @@
         }
       }
       
-      // 小数での回答をチェック
       const decimalInput = parseFloat(el("decimalAnswer").value);
       if (!isNaN(decimalInput)) {
         const correctDecimal = fractionToDecimal(correctAnswer.num, correctAnswer.den);
@@ -592,6 +288,10 @@
         
         if (score % 5 === 0) {
           level++;
+          if (level > 10) {
+            gameComplete();
+            return;
+          }
           const newMonster = monsters[level - 1] || monsters[monsters.length - 1];
           el("monster").textContent = newMonster;
           collectedMonsters.push(newMonster);
@@ -603,16 +303,17 @@
         el("status").innerHTML = `🎉 正解！ スコア: ${score}`;
         setTimeout(generateQuestion, 2000);
       } else {
+        hp -= 1;
         el("wrongMessage").textContent = `💥 まちがい！`;
         el("answerSection").style.display = "none";
         el("wrongSection").style.display = "block";
-        // 正解は「つぎへ」を押した時にのみ表示
         el("correctAnswerDisplay").style.display = "none";
+        updateLevelDisplay();
       }
     }
 
     function retry() {
-      hp -= 0.5;
+      hp -= 1; // ときなおすを選んだ時もライフを-1
       updateLevelDisplay();
       el("answerSection").style.display = "block";
       el("wrongSection").style.display = "none";
@@ -626,18 +327,9 @@
     function nextQuestion() {
       hp -= 1;
       
-      // 正解を表示
       const correctDecimal = fractionToDecimal(correctAnswer.num, correctAnswer.den);
-      let correctAnswerText = "";
-      
-      if (correctAnswer.den === 1) {
-        correctAnswerText = `正解: ${correctAnswer.num}`;
-      } else {
-        correctAnswerText = `正解: ${correctAnswer.num}/${correctAnswer.den}`;
-        if (correctDecimal % 1 !== 0) {
-          correctAnswerText += ` (= ${correctDecimal.toFixed(3)})`;
-        }
-      }
+      let correctAnswerText = correctAnswer.den === 1 ? `正解: ${correctAnswer.num}` : `正解: ${correctAnswer.num}/${correctAnswer.den}`;
+      if (correctDecimal % 1 !== 0) correctAnswerText += ` (= ${correctDecimal.toFixed(3)})`;
       
       el("correctAnswerDisplay").textContent = correctAnswerText;
       el("correctAnswerDisplay").style.display = "block";
@@ -653,43 +345,57 @@
 
     function updateLevelDisplay() {
       const heartDisplay = hp > 0 ? "❤️".repeat(Math.floor(hp)) + (hp % 1 === 0.5 ? "💔" : "") : "💀";
-      el("levelInfo").innerHTML = `📈 レベル: ${level}（あと ${5 - (score % 5)} 問でレベルアップ）| HP: ${heartDisplay}`;
+      const remaining = level > 10 ? 0 : 5 - (score % 5);
+      el("levelInfo").innerHTML = `📈 レベル: ${level}${level <= 10 ? `（あと ${remaining} 問でレベルアップ）` : " (MAX)"} | HP: ${heartDisplay}`;
+    }
+
+    function gameComplete() {
+      clearInterval(gameTimer);
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      const minutes = Math.floor(elapsed / 60);
+      const seconds = elapsed % 60;
+      const timeStr = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      
+      el("game").style.display = "none";
+      el("characterCollection").style.display = "none";
+      el("scoreBoard").style.display = "block";
+      el("scoreTitle").innerHTML = "🎊 ゲームクリア！ 🎊";
+      el("scoreTitle").className = "game-clear";
+      el("finalScore").textContent = score;
+      el("clearTime").textContent = timeStr;
+      el("displayName").textContent = studentInfo;
+      
+      saveScore(studentInfo, score, timeStr);
+      displayRankings(score);
+      
+      el("rank").textContent = "🌟 分数マスター完全クリア！";
     }
 
     function displayRankings(currentScore) {
       const rankings = getRankings();
-      const rankingList = el("rankingList");
-      
-      let currentRank = 1;
-      for (let i = 0; i < rankings.length; i++) {
-        if (rankings[i].score > currentScore) {
-          currentRank++;
-        } else {
-          break;
-        }
-      }
+      let currentRank = rankings.filter(p => p.score > currentScore).length + 1;
       
       let rankingHTML = "";
-      const top3 = rankings.slice(0, 3);
-      
-      top3.forEach((player, index) => {
-        const rankEmoji = index === 0 ? "🥇" : index === 1 ? "🥈" : "🥉";
-        rankingHTML += `<div class="ranking-item">${rankEmoji} ${index + 1}位: ${player.score}点</div>`;
+      rankings.slice(0, 3).forEach((player, index) => {
+        const rankEmoji = ["🥇", "🥈", "🥉"][index];
+        rankingHTML += `<div style="margin:5px 0;padding:8px;background:white;border-radius:5px;font-size:16px;">${rankEmoji} ${index + 1}位: ${player.score}点 ${player.time || '--:--'}</div>`;
       });
       
-      rankingHTML += `<div class="ranking-item current-rank">🎯 あなたの順位: ${currentRank}位 (${currentScore}点)</div>`;
+      rankingHTML += `<div style="margin:5px 0;padding:8px;background:#d4edda!important;border:2px solid #28a745;border-radius:5px;font-size:16px;font-weight:bold;">🎯 あなたの順位: ${currentRank}位 (${currentScore}点)</div>`;
       
-      rankingList.innerHTML = rankingHTML;
+      el("rankingList").innerHTML = rankingHTML;
     }
 
     function showScoreBoard() {
+      clearInterval(gameTimer);
       el("game").style.display = "none";
       el("characterCollection").style.display = "none";
       el("scoreBoard").style.display = "block";
       el("finalScore").textContent = score;
+      el("clearTime").textContent = "--:--";
       el("displayName").textContent = studentInfo;
       
-      saveScore(studentInfo, score);
+      saveScore(studentInfo, score, "--:--");
       displayRankings(score);
       
       let rankText = score >= 25 ? "🌟 分数マスター！" : 
@@ -700,12 +406,9 @@
       el("rank").textContent = rankText;
     }
 
-    // エンターキーで答えを送信
     ["numerator", "denominator", "decimalAnswer"].forEach(id => {
       el(id).addEventListener("keypress", function(event) {
-        if (event.key === "Enter") {
-          submitAnswer();
-        }
+        if (event.key === "Enter") submitAnswer();
       });
     });
   </script>
