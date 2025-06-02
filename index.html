@@ -50,8 +50,8 @@ input{font-size:18px;padding:10px;border:2px solid #ddd;border-radius:5px;margin
 <div id="start">
 <h2>小学6年生の分数をマスターしよう！</h2>
 <div class="info">
-<p><strong>📚 内容：</strong>分数の計算・比較・文章題（10段階レベル制）</p>
-<p><strong>🎯 目標：</strong>レベル10でゲームクリア！各レベル5問ずつ</p>
+<p><strong>📚 内容：</strong>分数の計算・比較・文章題（9段階レベル制）</p>
+<p><strong>🎯 目標：</strong>レベル9でゲームクリア！各レベル5問ずつ</p>
 <p><strong>❤️ ルール：</strong>間違えると体力減少。体力0でゲーム終了</p>
 <p><strong>📝 注意：</strong>分数は必ず約分してから答えてください</p>
 </div>
@@ -64,7 +64,7 @@ input{font-size:18px;padding:10px;border:2px solid #ddd;border-radius:5px;margin
 </div>
 
 <div id="game" style="display:none">
-<div class="info">レベル<span id="lv">1</span>/10 - <span id="lvInfo"></span></div>
+<div class="info">レベル<span id="lv">1</span>/9 - <span id="lvInfo"></span></div>
 <div class="monster" id="monster">📊</div>
 <div class="question" id="q"></div>
 
@@ -122,11 +122,11 @@ input{font-size:18px;padding:10px;border:2px solid #ddd;border-radius:5px;margin
 </div>
 
 <div id="gameover" style="display:none" class="gameover">
-<h1>💀 ゲームオーバー 💀</h1>
+<h1>ゲームオーバー</h1>
 <div class="monster" style="font-size:120px">😵</div>
 <h2>残念！体力が0になりました</h2>
 <div class="info">
-<p>到達レベル: <span id="finalLevel"></span>/10</p>
+<p>到達レベル: <span id="finalLevel"></span>/9</p>
 <p>獲得スコア: <span id="finalScore1"></span>点</p>
 </div>
 <button onclick="restart()">もう一度</button>
@@ -143,8 +143,8 @@ input{font-size:18px;padding:10px;border:2px solid #ddd;border-radius:5px;margin
 <script>
 const $=id=>document.getElementById(id);
 let score=0,level=1,hp=3,ans,qNum=0,info="",currentProblem,currentUnit="";
-const monsters=["📊","🔢","✖️","🔄","⚖️","➕","🔁","🔄","⏰","🏃"];
-const levelNames=["分数×整数","分数÷整数","分数×分数","帯分数×帯分数","大小比較","計算の順序","分配法則","逆数","時間・分数","速さの文章題"];
+const monsters=["📊","🔢","✖️","🔄","⭐","⚖️","💡","🏃","👑"];
+const levelNames=["分数×整数","分数÷整数","分数×分数","帯分数×帯分数","分数×分数×分数","大小比較","逆数","時間の分数","分数の文章題"];
 
 function gcd(a,b){return b?gcd(b,a%b):a}
 function simplify(n,d){const g=gcd(Math.abs(n),Math.abs(d));return[n/g,d/g]}
@@ -158,8 +158,18 @@ function formatFraction(numerator, denominator) {
     return `<span class="fraction-display"><span class="numerator">${numerator}</span><span class="fraction-bar"></span><span class="denominator">${denominator}</span></span>`;
 }
 
-// 帯分数を横線付きで表示する関数
+// 帯分数を横線付きで表示する関数（真分数のみ）
 function formatMixedNumber(whole, numerator, denominator) {
+    if (numerator >= denominator) {
+        // 仮分数の場合、帯分数に変換
+        const additionalWhole = Math.floor(numerator / denominator);
+        const newNumerator = numerator % denominator;
+        whole += additionalWhole;
+        numerator = newNumerator;
+    }
+    if (numerator === 0) {
+        return `${whole}`;
+    }
     return `${whole} ${formatFraction(numerator, denominator)}`;
 }
 
@@ -183,49 +193,57 @@ const [n2,d2]=randFrac(8,12);
 const [rn,rd]=simplify(n1*n2,d1*d2);
 return {q:`${formatFraction(n1,d1)} × ${formatFraction(n2,d2)} =`,a:`${rn}━${rd}`,type:'fraction',decimal:(n1*n2)/(d1*d2),allowMixed:false};
 }
-case 4:{ // 帯分数×帯分数 - 答えは仮分数で統一
-const w1=rand(1,3),n1=rand(1,4),d1=rand(3,6);
-const w2=rand(1,3),n2=rand(1,4),d2=rand(3,6);
+case 4:{ // 帯分数×帯分数 - 分数部分は真分数のみ
+const w1=rand(1,3),d1=rand(3,6);
+const n1=rand(1,d1-1); // 真分数になるように
+const w2=rand(1,2),d2=rand(3,5);
+const n2=rand(1,d2-1); // 真分数になるように
 const [i1,id1]=mixed2improper(w1,n1,d1);
 const [i2,id2]=mixed2improper(w2,n2,d2);
 const [rn,rd]=simplify(i1*i2,id1*id2);
 return {q:`${formatMixedNumber(w1,n1,d1)} × ${formatMixedNumber(w2,n2,d2)} =`,a:`${rn}━${rd}`,type:'fraction',decimal:(i1*i2)/(id1*id2),allowMixed:true};
 }
-case 5:{ // 大小比較
+case 5:{ // 分数×分数×分数
+const [n1,d1]=randFrac(6,8);
+const [n2,d2]=randFrac(6,8);
+const [n3,d3]=randFrac(6,8);
+const [rn,rd]=simplify(n1*n2*n3,d1*d2*d3);
+return {q:`${formatFraction(n1,d1)} × ${formatFraction(n2,d2)} × ${formatFraction(n3,d3)} =`,a:`${rn}━${rd}`,type:'fraction',decimal:(n1*n2*n3)/(d1*d2*d3),allowMixed:false};
+}
+case 6:{ // 大小比較 - 分数の積と分数の関係
 const [n1,d1]=randFrac(8,12);
 const [n2,d2]=randFrac(8,12);
 const val1=n1/d1,val2=n2/d2;
-const expr1=`${formatFraction(n1,d1)} × ${formatFraction(n2,d2)}`;
-const expr2=`${formatFraction(n1,d1)}`;
-const result1=val1*val2,result2=val1;
+
+// より明確な比較のための問題パターン
+const patterns = [
+    // 分数×分数 vs 分数
+    {
+        expr1: `${formatFraction(n1,d1)} × ${formatFraction(n2,d2)}`,
+        expr2: `${formatFraction(n1,d1)}`,
+        result1: val1*val2,
+        result2: val1
+    },
+    // 分数×整数 vs 分数
+    {
+        expr1: `${formatFraction(n1,d1)} × ${rand(2,4)}`,
+        expr2: `${formatFraction(n1,d1)}`,
+        result1: val1*rand(2,4),
+        result2: val1
+    }
+];
+
+const pattern = patterns[rand(0,1)];
 let answer;
-if(Math.abs(result1-result2)<0.0001)answer='equal';
-else answer=result1>result2?'left':'right';
-return {q:`${expr1} と ${expr2} どちらが大きいですか？`,a:answer,type:'comparison',left:expr1,right:expr2,allowMixed:false};
+if(Math.abs(pattern.result1-pattern.result2)<0.0001)answer='equal';
+else answer=pattern.result1>pattern.result2?'left':'right';
+return {q:`${pattern.expr1} と ${pattern.expr2} どちらが大きいですか？`,a:answer,type:'comparison',left:pattern.expr1,right:pattern.expr2,allowMixed:false};
 }
-case 6:{ // 計算の順序
-const [n1,d1]=randFrac(6,8);
-const [n2,d2]=randFrac(6,8);
-const i=rand(2,8);
-// 分数の足し算を正確に計算
-const addNum = n1*d2 + n2*d1;
-const addDen = d1*d2;
-const [addSimplifiedNum, addSimplifiedDen] = simplify(addNum, addDen);
-// 結果に整数を掛ける
-const [resultNum, resultDen] = simplify(addSimplifiedNum*i, addSimplifiedDen);
-return {q:`(${formatFraction(n1,d1)} + ${formatFraction(n2,d2)}) × ${i} =`,a:`${resultNum}━${resultDen}`,type:'fraction',decimal:(resultNum/resultDen),allowMixed:false};
-}
-case 7:{ // 分配法則
-const [n,d]=randFrac(6,10);
-const a=rand(3,8),b=rand(3,8);
-const [rn,rd]=simplify(n*(a+b),d);
-return {q:`${formatFraction(n,d)} × ${a} + ${formatFraction(n,d)} × ${b} =`,a:`${rn}━${rd}`,type:'fraction',decimal:(rn/rd),allowMixed:false};
-}
-case 8:{ // 逆数
+case 7:{ // 逆数
 const [n,d]=randFrac(8,12);
 return {q:`${formatFraction(n,d)} の逆数を求めましょう`,a:`${d}━${n}`,type:'fraction',decimal:d/n,allowMixed:false};
 }
-case 9:{ // 時間・分数
+case 8:{ // 時間・分数
 const problems=[
 ()=>{
 const m=rand(10,50);
@@ -245,22 +263,31 @@ return {q:`${h}時間は何日ですか？`,a:`${rn}━${rd}`,unit:"日",type:'f
 ];
 return problems[rand(0,2)]();
 }
-case 10:{ // 速さの文章題 - 大きな数になりやすいので帯分数も許可
+case 9:{ // 分数の文章題 - 分数×分数、または整数÷分数
 const problems=[
+// 分数×分数の問題
 ()=>{
-const [n,d]=randFrac(6,10);
-const t=rand(2,5);
-const [rn,rd]=simplify(n*t,d);
-return {q:`時速${formatFraction(n,d)}kmで${t}時間歩きました。何km進みましたか？`,a:`${rn}━${rd}`,unit:"km",type:'fraction',decimal:(n*t)/d,allowMixed:true};
+const [n1,d1]=randFrac(6,10);
+const [n2,d2]=randFrac(4,8);
+const [rn,rd]=simplify(n1*n2,d1*d2);
+return {q:`全体の${formatFraction(n1,d1)}の${formatFraction(n2,d2)}は、全体のどれだけですか？`,a:`${rn}━${rd}`,type:'fraction',decimal:(n1*n2)/(d1*d2),allowMixed:false};
 },
+// 整数÷分数の問題
 ()=>{
+const wholeNum=rand(2,8);
 const [n,d]=randFrac(4,8);
-const dist=rand(2,6);
-const [rn,rd]=simplify(dist*d,n);
-return {q:`${dist}kmの道のりを時速${formatFraction(n,d)}kmで歩きます。何時間かかりますか？`,a:`${rn}━${rd}`,unit:"時間",type:'fraction',decimal:(dist*d)/n,allowMixed:true};
+const [rn,rd]=simplify(wholeNum*d,n);
+return {q:`${wholeNum}個のお菓子を${formatFraction(n,d)}個ずつ分けると、何人に分けられますか？`,a:`${rn}━${rd}`,unit:"人",type:'fraction',decimal:(wholeNum*d)/n,allowMixed:true};
+},
+// 距離と分数の問題
+()=>{
+const distance=rand(3,8);
+const [n,d]=randFrac(3,6);
+const [rn,rd]=simplify(distance*d,n);
+return {q:`${distance}kmの道のりを${formatFraction(n,d)}kmずつ歩きます。何回に分けて歩けますか？`,a:`${rn}━${rd}`,unit:"回",type:'fraction',decimal:(distance*d)/n,allowMixed:true};
 }
 ];
-return problems[rand(0,1)]();
+return problems[rand(0,2)]();
 }
 }
 }
@@ -285,7 +312,7 @@ $("monster").textContent=monsters[level-1];
 
 function nextQ(){
 if(qNum>=5){
-if(level>=10){showClear();return}
+if(level>=9){showClear();return}
 level++;qNum=0;
 $("monster").classList.add("level-up");
 setTimeout(()=>$("monster").classList.remove("level-up"),2000);
