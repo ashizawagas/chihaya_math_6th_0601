@@ -5,21 +5,22 @@
 <title>千早算数クエスト - 6年生分数版</title>
 <style>
 body{font-family:Arial;text-align:center;background:#f0f8ff;margin:0;padding:20px}
-.monster{font-size:80px;transition:transform 0.3s;margin:20px 0}
+.monster{font-size:80px;transition:all 0.3s;margin:20px 0}
 .monster.level-up{animation:levelUp 2s}
 .monster.correct{animation:correct 1s}
 .monster.wrong{animation:wrong 1s}
 @keyframes levelUp{0%{transform:scale(1)}50%{transform:scale(2)rotate(180deg);color:#ff0}100%{transform:scale(1)rotate(360deg);color:gold}}
 @keyframes correct{0%{transform:scale(1)}50%{transform:scale(1.3);color:#0f0}100%{transform:scale(1);color:gold}}
 @keyframes wrong{0%{transform:scale(1)}25%{transform:scale(1.2)rotate(-10deg);color:#f00}50%{transform:scale(1.2)rotate(10deg);color:#f00}75%{transform:scale(1.2)rotate(-10deg);color:#f00}100%{transform:scale(1);color:#333}}
-.question{font-size:24px;margin:20px;padding:20px;background:white;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,0.1)}
+.q{font-size:24px;margin:20px;padding:20px;background:white;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,0.1)}
 button{margin:10px;padding:12px 24px;font-size:16px;border:none;border-radius:8px;background:#4CAF50;color:white;cursor:pointer}
 button:hover{background:#45a049}
 .mode-btn{background:#2196f3;padding:15px 30px;font-size:18px;margin:20px}
 .mode-btn:hover{background:#1976d2}
 .mode-btn.practice{background:#ff9800}
 .mode-btn.practice:hover{background:#f57c00}
-input{font-size:18px;padding:10px;border:2px solid #ddd;border-radius:5px;margin:10px}
+input{font-size:18px;padding:10px;border:2px solid #ddd;border-radius:5px;margin:5px;width:70px;text-align:center}
+input:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,243,0.3)}
 .status{margin:15px 0;font-size:18px}
 .progress{background:#e0e0e0;border-radius:10px;margin:15px 0;height:20px;overflow:hidden}
 .progress-bar{height:100%;transition:width 0.3s}
@@ -36,15 +37,8 @@ input{font-size:18px;padding:10px;border:2px solid #ddd;border-radius:5px;margin
 .answer-section{background:white;border:2px solid #2196f3;border-radius:15px;padding:15px;min-width:180px}
 .answer-section h3{margin:0 0 10px 0;color:#2196f3;font-size:16px}
 .fraction-input{display:flex;flex-direction:column;align-items:center;gap:5px;margin:10px 0}
-.fraction-input input{width:70px;text-align:center;margin:2px}
 .fraction-line{width:80px;height:2px;background:#333;margin:3px 0}
 .mixed-input{display:flex;align-items:center;justify-content:center;gap:8px;margin:10px 0}
-.mixed-input input{width:50px;text-align:center}
-.normal-input{display:flex;flex-direction:column;align-items:center;gap:10px;margin:10px 0}
-.normal-input input{width:100px;text-align:center}
-.unit-display{font-size:14px;font-weight:bold;color:#666;margin-top:5px}
-.submit-btn{padding:12px 20px;font-size:16px;background:#4CAF50;color:white;border:none;border-radius:8px;cursor:pointer}
-.submit-btn:hover{background:#45a049}
 .comparison-options{display:flex;justify-content:center;gap:15px;margin:20px 0}
 .comparison-btn{padding:12px 25px;font-size:16px;background:#e3f2fd;border:2px solid #2196f3;border-radius:8px;cursor:pointer}
 .comparison-btn:hover{background:#2196f3;color:white}
@@ -60,6 +54,7 @@ input{font-size:18px;padding:10px;border:2px solid #ddd;border-radius:5px;margin
 .correct-answer{background:#e8f5e8;color:#2e7d32;padding:10px;border-radius:8px;margin:10px 0;font-size:16px;border:2px solid #4caf50}
 .error-msg{background:#ffebee;color:#d32f2f;padding:10px;border-radius:8px;margin:10px 0;border:2px solid #f44336}
 .almost-msg{background:#fff3e0;color:#f57c00;padding:10px;border-radius:8px;margin:10px 0;border:2px solid #ff9800}
+.unit{font-size:14px;font-weight:bold;color:#666;margin-top:5px}
 </style>
 </head>
 <body>
@@ -68,14 +63,8 @@ input{font-size:18px;padding:10px;border:2px solid #ddd;border-radius:5px;margin
 <div id="start">
 <h2>モードを選択してください</h2>
 <div class="info">
-<div class="mode-info practice">
-<h3>📚 練習モード</h3>
-<p>• 各レベルで5問連続正解で次のレベルへ<br>• 間違えたらそのレベルのカウントが0に戻る</p>
-</div>
-<div class="mode-info summary">
-<h3>🎯 まとめモード</h3>
-<p>• 全9レベル×各5問＝計45問に挑戦<br>• 一問でも間違えるとゲームオーバー</p>
-</div>
+<div class="mode-info practice"><h3>📚 練習モード</h3><p>• 各レベルで5問連続正解で次のレベルへ<br>• 間違えたらそのレベルのカウントが0に戻る</p></div>
+<div class="mode-info summary"><h3>🎯 まとめモード</h3><p>• 全9レベル×各5問＝計45問に挑戦<br>• 一問でも間違えるとゲームオーバー</p></div>
 </div>
 <button class="mode-btn practice" onclick="selectMode('practice')">練習モード</button>
 <button class="mode-btn" onclick="selectMode('summary')">まとめモード</button>
@@ -88,10 +77,9 @@ input{font-size:18px;padding:10px;border:2px solid #ddd;border-radius:5px;margin
 <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
 <div id="levelProgress"></div>
 </div>
-
 <div class="level-indicator" id="levelIndicator"></div>
 <div class="monster" id="monster">📊</div>
-<div class="question" id="q"></div>
+<div class="q" id="q"></div>
 
 <div id="answerSections" class="answer-sections">
 <div class="answer-section">
@@ -101,31 +89,29 @@ input{font-size:18px;padding:10px;border:2px solid #ddd;border-radius:5px;margin
 <div class="fraction-line"></div>
 <input type="number" id="d" placeholder="分母" min="1">
 </div>
-<div id="fUnit" class="unit-display" style="display:none"></div>
-<button class="submit-btn" onclick="submitFraction()">分数で答える</button>
+<div id="fUnit" class="unit" style="display:none"></div>
+<button onclick="submitFraction()">分数で答える</button>
 </div>
 
 <div class="answer-section" id="mixedSection" style="display:none">
 <h3>帯分数で答える（約分必須）</h3>
 <div class="mixed-input">
-<input type="number" id="mw" placeholder="整数" min="0">
+<input type="number" id="mw" placeholder="整数" min="0" style="width:50px">
 <div class="fraction-input" style="margin:0">
-<input type="number" id="mn" placeholder="分子" min="0">
+<input type="number" id="mn" placeholder="分子" min="0" style="width:50px">
 <div class="fraction-line"></div>
-<input type="number" id="md" placeholder="分母" min="1">
+<input type="number" id="md" placeholder="分母" min="1" style="width:50px">
 </div>
 </div>
-<div id="mUnit" class="unit-display" style="display:none"></div>
-<button class="submit-btn" onclick="submitMixed()">帯分数で答える</button>
+<div id="mUnit" class="unit" style="display:none"></div>
+<button onclick="submitMixed()">帯分数で答える</button>
 </div>
 
 <div class="answer-section">
 <h3>整数・小数で答える</h3>
-<div class="normal-input">
-<input type="text" id="norm" placeholder="答えを入力">
-<div id="nUnit" class="unit-display" style="display:none"></div>
-</div>
-<button class="submit-btn" onclick="submitNormal()">整数・小数で答える</button>
+<input type="text" id="norm" placeholder="答えを入力" style="width:100px">
+<div id="nUnit" class="unit" style="display:none"></div>
+<button onclick="submitNormal()">整数・小数で答える</button>
 </div>
 </div>
 
@@ -136,17 +122,10 @@ input{font-size:18px;padding:10px;border:2px solid #ddd;border-radius:5px;margin
 </div>
 
 <div id="wrong" style="display:none">
-<div id="almostMsg" class="almost-msg" style="display:none">
-<strong>おしい！約分できます</strong><br>
-<span id="almostText"></span>
-</div>
+<div id="almostMsg" class="almost-msg" style="display:none"><strong>おしい！約分できます</strong><br><span id="almostText"></span></div>
 <div id="wrongMsg" class="error-msg">まちがいです。</div>
-<div id="correctAnswer" class="correct-answer" style="display:none">
-<strong>正解：</strong><span id="correctText"></span>
-</div>
-<div id="practiceMsg" style="display:none">
-<p>このレベルのカウントが0に戻ります。頑張って！</p>
-</div>
+<div id="correctAnswer" class="correct-answer" style="display:none"><strong>正解：</strong><span id="correctText"></span></div>
+<div id="practiceMsg" style="display:none"><p>このレベルのカウントが0に戻ります。頑張って！</p></div>
 <button onclick="retry()">もう一度</button>
 <button onclick="next()">つぎへ</button>
 </div>
@@ -161,10 +140,7 @@ input{font-size:18px;padding:10px;border:2px solid #ddd;border-radius:5px;margin
 <h1>ゲームオーバー</h1>
 <div class="monster" style="font-size:120px">😵</div>
 <h2>残念！</h2>
-<div class="info">
-<p>到達レベル: <span id="finalLv"></span>/9</p>
-<p>正解数: <span id="finalScore1"></span>問</p>
-</div>
+<div class="info"><p>到達レベル: <span id="finalLv"></span>/9</p><p>正解数: <span id="finalScore1"></span>問</p></div>
 <button onclick="restart()">もう一度</button>
 </div>
 
@@ -177,273 +153,274 @@ input{font-size:18px;padding:10px;border:2px solid #ddd;border-radius:5px;margin
 </div>
 
 <script>
-const $=id=>document.getElementById(id);
-let score=0,level=1,prob,unit="",mode="",lvCount=0,totalQ=0,qNum=0;
-const monsters=["📊","🔢","🔲","🔄","⭐","⚖️","💡","🏃","👑"];
-const lvNames=["分数×整数","分数÷整数","分数×分数","帯分数×帯分数","分数×分数×分数","大小比較","逆数","時間の分数","分数の文章題"];
-const completed=new Set();
-
-function gcd(a,b){return b?gcd(b,a%b):a;}
-function simplify(n,d){if(d<0){n=-n;d=-d;}const g=gcd(Math.abs(n),Math.abs(d));return[n/g,d/g];}
-function R(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
-
-function randFrac(maxN=10,maxD=10){
-let n,d;
-do{n=R(1,maxN);d=R(2,maxD);}while(gcd(n,d)!==1||n>=d);
-return[n,d];
-}
-
-function frac(n,d){
-return `<span class="fraction-display"><span class="numerator">${n}</span><span class="fraction-bar"></span><span class="denominator">${d}</span></span>`;
-}
-
-function mixedFrac(w,n,d){
-if(n>=d){w+=Math.floor(n/d);n=n%d;}
-return n===0?`${w}`:`${w} ${frac(n,d)}`;
-}
-
-function formatAnswer(n,d,u=""){
-const[sn,sd]=simplify(n,d);
-return sd===1?sn+u:`${sn}/${sd}`+u;
-}
-
-function selectMode(m){
-mode=m;
-$("start").style.display="none";
-$("game").style.display="block";
-score=level=qNum=lvCount=totalQ=0;
-level=1;
-completed.clear();
-updateDisplay();
-updateLevelIndicator();
-nextQ();
-}
-
-function updateDisplay(){
-$("lv").textContent=level;
-$("lvInfo").textContent=lvNames[level-1];
-$("score").textContent=score;
-$("monster").textContent=monsters[level-1];
-
-const bar=$("progressBar");
-if(mode==='practice'){
-$("modeDisplay").innerHTML='<div class="mode-info practice"><strong>📚 練習モード</strong></div>';
-$("levelProgress").textContent=`このレベル: ${lvCount}/5問正解`;
-bar.className="progress-bar practice";
-bar.style.width=`${(lvCount/5)*100}%`;
-$("totalQ").style.display="none";
-}else{
-$("modeDisplay").innerHTML='<div class="mode-info summary"><strong>🎯 まとめモード</strong></div>';
-$("levelProgress").textContent=`問題 ${totalQ+1}/45`;
-bar.className="progress-bar summary";
-bar.style.width=`${(totalQ/45)*100}%`;
-$("totalQ").style.display="inline";
-$("totalQ").textContent=" / 45問中";
-}
-}
-
-function updateLevelIndicator(){
-const ind=$("levelIndicator");
-ind.innerHTML="";
-for(let i=1;i<=9;i++){
-const dot=document.createElement("div");
-dot.className="level-dot";
-dot.textContent=i;
-if(completed.has(i))dot.classList.add("completed");
-else if(i===level)dot.classList.add("current");
-ind.appendChild(dot);
-}
-}
-
-function generateProblem(lv){
-const patterns={
-1:()=>{const[n,d]=randFrac(9,12);const i=R(2,8);return{q:`${frac(n,d)} × ${i} =`,n:n*i,d:d,type:'fraction',mixed:false};},
-2:()=>{const[n,d]=randFrac(8,10);const i=R(2,6);return{q:`${frac(n,d)} ÷ ${i} =`,n:n,d:d*i,type:'fraction',mixed:false};},
-3:()=>{const[n1,d1]=randFrac(8,12);const[n2,d2]=randFrac(8,12);return{q:`${frac(n1,d1)} × ${frac(n2,d2)} =`,n:n1*n2,d:d1*d2,type:'fraction',mixed:false};},
-4:()=>{const w1=R(1,3),d1=R(3,6),n1=R(1,d1-1);const w2=R(1,2),d2=R(3,5),n2=R(1,d2-1);const i1=w1*d1+n1,i2=w2*d2+n2;return{q:`${mixedFrac(w1,n1,d1)} × ${mixedFrac(w2,n2,d2)} =`,n:i1*i2,d:d1*d2,type:'fraction',mixed:true};},
-5:()=>{const[n1,d1]=randFrac(6,8);const[n2,d2]=randFrac(6,8);const[n3,d3]=randFrac(6,8);return{q:`${frac(n1,d1)} × ${frac(n2,d2)} × ${frac(n3,d3)} =`,n:n1*n2*n3,d:d1*d2*d3,type:'fraction',mixed:false};},
-6:()=>{const[n1,d1]=randFrac(8,12);const[n2,d2]=randFrac(8,12);const v1=n1/d1,v2=n2/d2;const mult=R(2,4);const ps=[{e1:`${frac(n1,d1)} × ${frac(n2,d2)}`,e2:`${frac(n1,d1)}`,v1:v1*v2,v2:v1},{e1:`${frac(n1,d1)} × ${mult}`,e2:`${frac(n1,d1)}`,v1:v1*mult,v2:v1}];const p=ps[R(0,1)];return{q:`${p.e1} と ${p.e2} どちらが大きいですか？`,a:Math.abs(p.v1-p.v2)<0.0001?'equal':p.v1>p.v2?'left':'right',type:'comparison',mixed:false};},
-7:()=>{const[n,d]=randFrac(8,12);return{q:`${frac(n,d)} の逆数を求めましょう`,n:d,d:n,type:'fraction',mixed:false};},
-8:()=>{const ps=[()=>{const m=R(10,50);return{q:`${m}分は何時間ですか？`,n:m,d:60,u:"時間",type:'fraction',mixed:false}},()=>{const s=R(15,55);return{q:`${s}秒は何分ですか？`,n:s,d:60,u:"分",type:'fraction',mixed:false}},()=>{const h=R(15,45);return{q:`${h}時間は何日ですか？`,n:h,d:24,u:"日",type:'fraction',mixed:false}}];return ps[R(0,2)]();},
-9:()=>{const ps=[()=>{const t=R(12,24);const[n,d]=randFrac(4,8);return{q:`${t}個のお菓子の${frac(n,d)}は何個ですか？`,n:t*n,d:d,u:"個",type:'fraction',mixed:true};},()=>{const t=R(6,15);const div=R(2,5);return{q:`${t}個のりんごを${div}人で等しく分けると、1人あたり何個になりますか？`,n:t,d:div,u:"個",type:'fraction',mixed:true};},()=>{const[n,d]=randFrac(6,10);const w=R(8,20);return{q:`${w}mのリボンの${frac(n,d)}の長さは何mですか？`,n:w*n,d:d,u:"m",type:'fraction',mixed:false};}];return ps[R(0,2)]();}
+const $ = id => document.getElementById(id);
+const s = {score:0,level:1,prob:null,unit:"",mode:"",lvCount:0,totalQ:0,qNum:0,completed:new Set()};
+const C = {
+    monsters:["📊","🔢","🔲","🔄","⭐","⚖️","💡","🏃","👑"],
+    lvNames:["分数×整数","分数÷整数","分数×分数","帯分数×帯分数","分数×分数×分数","大小比較","逆数","時間の分数","分数の文章題"]
 };
-return patterns[lv]();
+
+const gcd = (a,b) => b ? gcd(b,a%b) : a;
+const R = (min,max) => Math.floor(Math.random()*(max-min+1))+min;
+const simplify = (n,d) => {if(d<0){n=-n;d=-d;}const g=gcd(Math.abs(n),Math.abs(d));return[n/g,d/g];};
+const randFrac = (maxN=10,maxD=10) => {let n,d;do{n=R(1,maxN);d=R(2,maxD);}while(gcd(n,d)!==1||n>=d);return[n,d];};
+const frac = (n,d) => `<span class="fraction-display"><span class="numerator">${n}</span><span class="fraction-bar"></span><span class="denominator">${d}</span></span>`;
+const mixedFrac = (w,n,d) => {if(n>=d){w+=Math.floor(n/d);n=n%d;}return n===0?`${w}`:`${w} ${frac(n,d)}`;};
+const formatAnswer = (n,d,u="") => {const[sn,sd]=simplify(n,d);return sd===1?sn+u:`${sn}/${sd}`+u;};
+
+function setFocus() {
+    setTimeout(() => {
+        const target = s.prob?.type === 'comparison' ? document.querySelector('.comparison-btn') :
+                      $("mixedSection").style.display === "block" ? $("md") : $("d");
+        if(target) {target.focus(); if(target.select) target.select();}
+    }, 100);
 }
 
-function nextQ(){
-if(mode==='practice'){
-if(lvCount>=5){
-completed.add(level);
-if(level>=9){showClear();return;}
-level++;lvCount=0;
-animate("level-up");
-updateLevelIndicator();
-}
-}else{
-if(level>=9&&qNum>=5){showClear();return;}
-if(qNum>=5){
-completed.add(level);level++;qNum=0;
-animate("level-up");
-updateLevelIndicator();
-}
-}
+document.addEventListener('keydown', e => {
+    if(e.key === 'Enter' && e.target.tagName === 'INPUT') {
+        e.preventDefault();
+        if(['n','d'].includes(e.target.id)) submitFraction();
+        else if(['mw','mn','md'].includes(e.target.id)) submitMixed();
+        else if(e.target.id === 'norm') submitNormal();
+    }
+    if(s.prob?.type === 'comparison') {
+        if(e.key === '1') submitComparison('left');
+        else if(e.key === '2') submitComparison('right');
+        else if(e.key === '3') submitComparison('equal');
+    }
+    if($("wrong").style.display !== "none") {
+        if(e.key === 'Enter' || e.key === ' ') retry();
+        else if(e.key === 'n' || e.key === 'N') next();
+    }
+});
 
-prob=generateProblem(level);
-$("q").innerHTML=prob.q;
-unit=prob.u||"";
-
-clearInputs();
-$("wrong").style.display="none";
-
-if(prob.type==='comparison'){
-$("answerSections").style.display="none";
-$("comparisonInput").style.display="block";
-}else{
-$("answerSections").style.display="flex";
-$("comparisonInput").style.display="none";
+function selectMode(m) {
+    s.mode = m;
+    s.score = s.level = s.qNum = s.lvCount = s.totalQ = 0;
+    s.level = 1;
+    s.completed.clear();
+    $("start").style.display = "none";
+    $("game").style.display = "block";
+    updateDisplay();
+    updateLevelIndicator();
+    nextQ();
 }
 
-$("mixedSection").style.display=prob.mixed?"block":"none";
-
-const show=unit?"block":"none";
-["fUnit","mUnit","nUnit"].forEach(id=>{$(id).textContent=unit;$(id).style.display=show;});
-
-updateDisplay();
-$("n").focus();
+function updateDisplay() {
+    $("lv").textContent = s.level;
+    $("lvInfo").textContent = C.lvNames[s.level-1];
+    $("score").textContent = s.score;
+    $("monster").textContent = C.monsters[s.level-1];
+    const bar = $("progressBar");
+    if(s.mode === 'practice') {
+        $("modeDisplay").innerHTML = '<div class="mode-info practice"><strong>📚 練習モード</strong></div>';
+        $("levelProgress").textContent = `このレベル: ${s.lvCount}/5問正解`;
+        bar.className = "progress-bar practice";
+        bar.style.width = `${(s.lvCount/5)*100}%`;
+        $("totalQ").style.display = "none";
+    } else {
+        $("modeDisplay").innerHTML = '<div class="mode-info summary"><strong>🎯 まとめモード</strong></div>';
+        $("levelProgress").textContent = `問題 ${s.totalQ+1}/45`;
+        bar.className = "progress-bar summary";
+        bar.style.width = `${(s.totalQ/45)*100}%`;
+        $("totalQ").style.display = "inline";
+        $("totalQ").textContent = " / 45問中";
+    }
 }
 
-function clearInputs(){
-["n","d","mw","mn","md","norm"].forEach(id=>$(id).value="");
+function updateLevelIndicator() {
+    const ind = $("levelIndicator");
+    ind.innerHTML = "";
+    for(let i=1; i<=9; i++) {
+        const dot = document.createElement("div");
+        dot.className = "level-dot";
+        dot.textContent = i;
+        if(s.completed.has(i)) dot.classList.add("completed");
+        else if(i === s.level) dot.classList.add("current");
+        ind.appendChild(dot);
+    }
 }
 
-function animate(cls){
-$("monster").classList.add(cls);
-setTimeout(()=>$("monster").classList.remove(cls),cls==="level-up"?2000:1000);
+const problemGenerators = {
+    1: () => {const[n,d]=randFrac(9,12);const i=R(2,8);return{q:`${frac(n,d)} × ${i} =`,n:n*i,d:d,type:'fraction',mixed:false};},
+    2: () => {const[n,d]=randFrac(8,10);const i=R(2,6);return{q:`${frac(n,d)} ÷ ${i} =`,n:n,d:d*i,type:'fraction',mixed:false};},
+    3: () => {const[n1,d1]=randFrac(8,12);const[n2,d2]=randFrac(8,12);return{q:`${frac(n1,d1)} × ${frac(n2,d2)} =`,n:n1*n2,d:d1*d2,type:'fraction',mixed:false};},
+    4: () => {const w1=R(1,3),d1=R(3,6),n1=R(1,d1-1);const w2=R(1,2),d2=R(3,5),n2=R(1,d2-1);const i1=w1*d1+n1,i2=w2*d2+n2;return{q:`${mixedFrac(w1,n1,d1)} × ${mixedFrac(w2,n2,d2)} =`,n:i1*i2,d:d1*d2,type:'fraction',mixed:true};},
+    5: () => {const[n1,d1]=randFrac(6,8);const[n2,d2]=randFrac(6,8);const[n3,d3]=randFrac(6,8);return{q:`${frac(n1,d1)} × ${frac(n2,d2)} × ${frac(n3,d3)} =`,n:n1*n2*n3,d:d1*d2*d3,type:'fraction',mixed:false};},
+    6: () => {const[n1,d1]=randFrac(8,12);const[n2,d2]=randFrac(8,12);const v1=n1/d1,v2=n2/d2;const mult=R(2,4);const patterns=[{e1:`${frac(n1,d1)} × ${frac(n2,d2)}`,e2:`${frac(n1,d1)}`,v1:v1*v2,v2:v1},{e1:`${frac(n1,d1)} × ${mult}`,e2:`${frac(n1,d1)}`,v1:v1*mult,v2:v1}];const p=patterns[R(0,1)];return{q:`${p.e1} と ${p.e2} どちらが大きいですか？<br><small>（1:左の式 2:右の式 3:同じ）</small>`,a:Math.abs(p.v1-p.v2)<0.0001?'equal':p.v1>p.v2?'left':'right',type:'comparison',mixed:false};},
+    7: () => {const[n,d]=randFrac(8,12);return{q:`${frac(n,d)} の逆数を求めましょう`,n:d,d:n,type:'fraction',mixed:false};},
+    8: () => {const patterns=[()=>({q:`${R(10,50)}分は何時間ですか？`,n:R(10,50),d:60,u:"時間",type:'fraction',mixed:false}),()=>({q:`${R(15,55)}秒は何分ですか？`,n:R(15,55),d:60,u:"分",type:'fraction',mixed:false}),()=>({q:`${R(15,45)}時間は何日ですか？`,n:R(15,45),d:24,u:"日",type:'fraction',mixed:false})];return patterns[R(0,2)]();},
+    9: () => {const patterns=[()=>{const t=R(12,24);const[n,d]=randFrac(4,8);return{q:`${t}個のお菓子の${frac(n,d)}は何個ですか？`,n:t*n,d:d,u:"個",type:'fraction',mixed:true};},()=>{const t=R(6,15);const div=R(2,5);return{q:`${t}個のりんごを${div}人で等しく分けると、1人あたり何個になりますか？`,n:t,d:div,u:"個",type:'fraction',mixed:true};},()=>{const[n,d]=randFrac(6,10);const w=R(8,20);return{q:`${w}mのリボンの${frac(n,d)}の長さは何mですか？`,n:w*n,d:d,u:"m",type:'fraction',mixed:false};}];return patterns[R(0,2)]();}
+};
+
+function nextQ() {
+    if(s.mode === 'practice') {
+        if(s.lvCount >= 5) {
+            s.completed.add(s.level);
+            if(s.level >= 9) {showClear();return;}
+            s.level++;
+            s.lvCount = 0;
+            animate("level-up");
+            updateLevelIndicator();
+        }
+    } else {
+        if(s.level >= 9 && s.qNum >= 5) {showClear();return;}
+        if(s.qNum >= 5) {
+            s.completed.add(s.level);
+            s.level++;
+            s.qNum = 0;
+            animate("level-up");
+            updateLevelIndicator();
+        }
+    }
+
+    s.prob = problemGenerators[s.level]();
+    $("q").innerHTML = s.prob.q;
+    s.unit = s.prob.u || "";
+
+    ["n","d","mw","mn","md","norm"].forEach(id => $(id).value = "");
+    $("wrong").style.display = "none";
+
+    if(s.prob.type === 'comparison') {
+        $("answerSections").style.display = "none";
+        $("comparisonInput").style.display = "block";
+    } else {
+        $("answerSections").style.display = "flex";
+        $("comparisonInput").style.display = "none";
+    }
+
+    $("mixedSection").style.display = s.prob.mixed ? "block" : "none";
+
+    const show = s.unit ? "block" : "none";
+    ["fUnit","mUnit","nUnit"].forEach(id => {
+        $(id).textContent = s.unit;
+        $(id).style.display = show;
+    });
+
+    updateDisplay();
+    setFocus();
 }
 
-function submitFraction(){
-const num=parseInt($("n").value)||0;
-const den=parseInt($("d").value)||1;
-if(den===0){showError("分母は0にできません");return;}
-if(num===0){showError("分子は0以外を入力してください");return;}
-checkAnswer(num,den);
+function animate(cls) {
+    $("monster").classList.add(cls);
+    setTimeout(() => $("monster").classList.remove(cls), cls === "level-up" ? 2000 : 1000);
 }
 
-function submitMixed(){
-const w=parseInt($("mw").value)||0;
-const num=parseInt($("mn").value)||0;
-const den=parseInt($("md").value)||1;
-if(num===0&&w===0){showError("答えを入力してください");return;}
-if(den===0){showError("分母は0にできません");return;}
-if(num>=den&&den>0){showError("帯分数の分子は分母より小さくしてください");return;}
-checkAnswer(w*den+num,den);
+function submitFraction() {
+    const num = parseInt($("n").value) || 0;
+    const den = parseInt($("d").value) || 1;
+    if(den === 0) {showError("分母は0にできません");return;}
+    if(num === 0 && den === 1) {showError("分子を入力してください");return;}
+    checkAnswer(num, den);
 }
 
-function submitNormal(){
-const ans=$("norm").value.trim();
-if(!ans){showError("答えを入力してください");return;}
-const userDec=parseFloat(ans);
-const correctDec=prob.n/prob.d;
-const isCorrect=!isNaN(userDec)&&Math.abs(userDec-correctDec)<0.0001;
-handleAnswer(isCorrect,formatAnswer(prob.n,prob.d,unit));
+function submitMixed() {
+    const w = parseInt($("mw").value) || 0;
+    const num = parseInt($("mn").value) || 0;
+    const den = parseInt($("md").value) || 1;
+    if(num === 0 && w === 0) {showError("答えを入力してください");return;}
+    if(den === 0) {showError("分母は0にできません");return;}
+    if(num >= den && den > 0 && num > 0) {showError("帯分数の分子は分母より小さくしてください");return;}
+    checkAnswer(w * den + num, den);
 }
 
-function submitComparison(choice){
-handleAnswer(choice===prob.a,prob.a);
+function submitNormal() {
+    const ans = $("norm").value.trim();
+    if(!ans) {showError("答えを入力してください");return;}
+    const userDec = parseFloat(ans);
+    const correctDec = s.prob.n / s.prob.d;
+    const isCorrect = !isNaN(userDec) && Math.abs(userDec - correctDec) < 0.0001;
+    handleAnswer(isCorrect, formatAnswer(s.prob.n, s.prob.d, s.unit));
 }
 
-function checkAnswer(userN,userD){
-const[correctN,correctD]=simplify(prob.n,prob.d);
-const[userSimple,userSimpleD]=simplify(userN,userD);
-const correctAnswer=formatAnswer(prob.n,prob.d,unit);
-
-// 約分チェック
-const g=gcd(Math.abs(userN),Math.abs(userD));
-if(g>1){
-// 約分していない場合は「おしい」メッセージ
-$("almostMsg").style.display="block";
-$("almostText").textContent=`${userN}/${userD} = ${userSimple}/${userSimpleD}`;
-$("wrongMsg").style.display="none";
-$("correctAnswer").style.display="block";
-$("correctText").textContent=correctAnswer;
-showWrong();
-return;
+function submitComparison(choice) {
+    handleAnswer(choice === s.prob.a, getComparisonAnswer());
 }
 
-// 正解チェック
-const isCorrect=userSimple===correctN&&userSimpleD===correctD;
-handleAnswer(isCorrect,correctAnswer);
+function getComparisonAnswer() {
+    const answerText = {'left':'左の式が大きい','right':'右の式が大きい','equal':'同じ'};
+    return answerText[s.prob.a];
 }
 
-function handleAnswer(isCorrect,correctAnswer){
-if(isCorrect){
-score++;
-if(mode==='practice')lvCount++;
-else{qNum++;totalQ++;}
-animate("correct");
-setTimeout(nextQ,1500);
-}else{
-$("almostMsg").style.display="none";
-$("wrongMsg").style.display="block";
-$("correctAnswer").style.display="block";
-$("correctText").textContent=correctAnswer;
-if(mode==='practice'){
-lvCount=0;
-$("practiceMsg").style.display="block";
-}else{
-showGameOver();
-return;
-}
-showWrong();
-}
+function checkAnswer(userN, userD) {
+    const[correctN,correctD] = simplify(s.prob.n, s.prob.d);
+    const[userSimple,userSimpleD] = simplify(userN, userD);
+    const correctAnswer = formatAnswer(s.prob.n, s.prob.d, s.unit);
+    const g = gcd(Math.abs(userN), Math.abs(userD));
+    const isCorrect = userSimple === correctN && userSimpleD === correctD;
+    const canSimplify = g > 1;
+
+    if(isCorrect) {
+        handleAnswer(true, correctAnswer);
+    } else if(canSimplify && Math.abs(userN - s.prob.n) < 0.001 && Math.abs(userD - s.prob.d) < 0.001) {
+        $("almostMsg").style.display = "block";
+        $("almostText").textContent = `${userN}/${userD} → ${formatAnswer(userN, userD, s.unit)}`;
+        $("wrongMsg").style.display = "none";
+        $("correctAnswer").style.display = "none";
+        $("wrong").style.display = "block";
+    } else {
+        handleAnswer(false, correctAnswer);
+    }
 }
 
-function showWrong(){
-animate("wrong");
-$("answerSections").style.display="none";
-$("comparisonInput").style.display="none";
-$("wrong").style.display="block";
+function handleAnswer(isCorrect, correctAnswer) {
+    if(isCorrect) {
+        s.score++;
+        if(s.mode === 'practice') s.lvCount++;
+        else s.qNum++;
+        s.totalQ++;
+        animate("correct");
+        setTimeout(() => nextQ(), 1000);
+    } else {
+        animate("wrong");
+        $("correctAnswer").style.display = "block";
+        $("correctText").textContent = correctAnswer;
+        $("almostMsg").style.display = "none";
+        $("wrongMsg").style.display = "block";
+        if(s.mode === 'practice') {
+            s.lvCount = 0;
+            $("practiceMsg").style.display = "block";
+        } else {
+            showGameOver();
+            return;
+        }
+        $("wrong").style.display = "block";
+    }
 }
 
-function showError(msg){
-alert(msg);
+function showError(msg) {
+    $("wrongMsg").textContent = msg;
+    $("correctAnswer").style.display = "none";
+    $("almostMsg").style.display = "none";
+    $("practiceMsg").style.display = "none";
+    $("wrong").style.display = "block";
 }
 
-function retry(){
-if(prob.type==='comparison')$("comparisonInput").style.display="block";
-else $("answerSections").style.display="flex";
-$("wrong").style.display="none";
-$("practiceMsg").style.display="none";
-$("almostMsg").style.display="none";
-clearInputs();
-updateDisplay();
-$("n").focus();
+function retry() {
+    $("wrong").style.display = "none";
+    ["n","d","mw","mn","md","norm"].forEach(id => $(id).value = "");
+    setFocus();
 }
 
-function next(){
-setTimeout(()=>{
-if(mode==='summary'){qNum++;totalQ++;}
-nextQ();
-},2000);
+function next() {
+    nextQ();
 }
 
-function showGameOver(){
-$("game").style.display="none";
-$("gameover").style.display="block";
-$("finalLv").textContent=level;
-$("finalScore1").textContent=score;
+function showGameOver() {
+    $("game").style.display = "none";
+    $("finalLv").textContent = s.level;
+    $("finalScore1").textContent = s.score;
+    $("gameover").style.display = "block";
 }
 
-function showClear(){
-$("game").style.display="none";
-$("clear").style.display="block";
-$("finalScore2").textContent=score;
+function showClear() {
+    $("game").style.display = "none";
+    $("finalScore2").textContent = s.score;
+    $("clear").style.display = "block";
 }
 
-function restart(){
-$("gameover").style.display="none";
-$("clear").style.display="none";
-$("start").style.display="block";
+function restart() {
+    location.reload();
 }
 </script>
 </body>
