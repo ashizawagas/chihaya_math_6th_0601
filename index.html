@@ -103,6 +103,11 @@ input:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,243
 .points-earned{background:#e8f5e8;color:#2e7d32;padding:10px;border-radius:8px;margin:10px 0;border:2px solid #4caf50;font-weight:bold;animation:pointsEarn 2s}
 @keyframes pointsEarn{0%{transform:scale(1)}50%{transform:scale(1.2)}100%{transform:scale(1)}}
 .session-points{background:#e3f2fd;color:#1976d2;padding:8px;border-radius:6px;margin:5px 0;border:1px solid #2196f3;font-size:14px}
+.player-id{background:#f3e5f5;color:#7b1fa2;padding:10px;border-radius:8px;margin:10px 0;border:2px solid #9c27b0;font-size:14px;font-weight:bold}
+.global-ranking{background:#fff3cd;border-radius:10px;padding:20px;margin:20px 0;border:2px solid #ffc107}
+.global-ranking h3{color:#f57c00;margin-bottom:15px}
+.global-ranking-item{display:flex;justify-content:space-between;align-items:center;padding:10px 15px;margin:5px 0;border-radius:5px;background:#fff8e1}
+.global-ranking-item.my-rank{background:#e8f5e8;border:2px solid #4caf50;font-weight:bold}
 </style>
 </head>
 <body>
@@ -110,11 +115,12 @@ input:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,243
 
 <div id="start">
 <h2>モードを選択してください</h2>
+<div id="playerIdDisplay" class="player-id" style="display:none">👤 プレイヤーID: <span id="playerId"></span></div>
 <div id="pointsDisplay" class="points-display" style="display:none">💰 総ポイント: <span id="totalPoints">0</span>P</div>
 <div class="info">
 <div class="mode-info select"><h3>🎮 選べるモード</h3><p>• 好きなレベルを選んで練習<br>• 何度でも挑戦可能<br>• 正解でポイント獲得</p></div>
 <div class="mode-info practice"><h3>📚 練習モード</h3><p>• 各レベルで5問連続正解で次のレベルへ<br>• 間違えたらそのレベルのカウントが0に戻る<br>• レベルアップでボーナスポイント</p></div>
-<div class="mode-info summary"><h3>🎯 まとめモード</h3><p>• 全9レベル×各5問＝計45問に挑戦<br>• 一問でも間違えるとゲームオーバー<br>• クリア時間に応じて大量ポイント獲得</p></div>
+<div class="mode-info summary"><h3>🎯 まとめモード</h3><p>• 全9レベル×各5問＝計45問に挑戦<br>• 一問でも間違えるとゲームオーバー<br>• クリア時間に応じて大量ポイント獲得<br>• <strong>クリアで隠しステージ解放！</strong></p></div>
 <div id="hiddenModeInfo" class="mode-info hidden" style="display:none"><h3>👑 隠しステージ</h3><p>• 超高難度の分数問題に挑戦<br>• 全10問クリアで「分数マスター」の称号獲得<br>• 派手なアニメーションで祝福！</p></div>
 </div>
 <button class="mode-btn select" onclick="showLevelSelect()">🎮 選べるモード</button>
@@ -231,6 +237,14 @@ input:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,243
 <p id="finalTime" style="display:none">経過時間: <span id="finalTimeValue"></span></p>
 <div id="gameoverPoints" class="points-earned" style="display:none">🎉 獲得ポイント: <span id="gameoverPointsValue">0</span>P</div>
 </div>
+<div id="globalRankingGameover" class="global-ranking" style="display:none">
+<h3>🌍 全体ランキング</h3>
+<div id="globalRankingListGameover"></div>
+<div style="margin-top:15px;padding-top:15px;border-top:2px solid #ddd;">
+<h4>あなたの順位</h4>
+<div id="myGlobalRankGameover"></div>
+</div>
+</div>
 <button onclick="restart()">もう一度</button>
 </div>
 
@@ -251,9 +265,17 @@ input:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,243
 <div id="myRankingItem"></div>
 </div>
 </div>
+<div id="globalRankingClear" class="global-ranking" style="display:none">
+<h3>🌍 全体ランキング</h3>
+<div id="globalRankingListClear"></div>
+<div style="margin-top:15px;padding-top:15px;border-top:2px solid #ddd;">
+<h4>あなたの順位</h4>
+<div id="myGlobalRankClear"></div>
+</div>
+</div>
 <div id="hiddenStageUnlock" class="hidden-stage-unlock" style="display:none;padding:20px;margin:20px;border-radius:15px;">
 <h3>🌟 隠しステージが解放されました！ 🌟</h3>
-<p>トップ画面から「隠しステージ」に挑戦できます！</p>
+<p>今すぐ隠しステージに挑戦できます！</p>
 </div>
 <button onclick="restart()">もう一度</button>
 </div>
@@ -269,6 +291,14 @@ input:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,243
 <p>最終スコア: <span id="hiddenFinalScore"></span>問正解</p>
 <div id="hiddenPointsEarned" class="points-earned" style="display:none">🎉 獲得ポイント: <span id="hiddenEarnedPoints">0</span>P</div>
 </div>
+<div id="globalRankingHidden" class="global-ranking" style="display:none">
+<h3>🌍 全体ランキング</h3>
+<div id="globalRankingListHidden"></div>
+<div style="margin-top:15px;padding-top:15px;border-top:2px solid #ddd;">
+<h4>あなたの順位</h4>
+<div id="myGlobalRankHidden"></div>
+</div>
+</div>
 <button onclick="restart()" style="padding:15px 30px;font-size:20px;background:#4CAF50;color:white;border:none;border-radius:10px;cursor:pointer;">トップに戻る</button>
 </div>
 </div>
@@ -280,11 +310,110 @@ const $=id=>document.getElementById(id)||{style:{},textContent:'',innerHTML:'',v
 let state={score:0,level:1,prob:null,unit:"",mode:"",lvCount:0,totalQ:0,qNum:0,completed:new Set(),selectedComparison:null,selectQCount:0,startTime:null,timerInterval:null,hiddenQ:0,sessionPoints:0};
 const monsters=["📊","🔢","🔲","🔄","⭐","⚖️","💡","🏃","👑"];
 const lvNames=["分数×整数","分数÷整数","分数×分数","帯分数×帯分数","分数×分数×分数","大小比較","逆数","時間の分数","分数の文章題"];
-let hiddenStageUnlocked=false,totalPoints=0;
-try{hiddenStageUnlocked=localStorage.getItem('hiddenStageUnlocked')==='true';totalPoints=parseInt(localStorage.getItem('totalPoints')||'0')}catch(e){}
+let totalPoints=0,hiddenStageAvailable=false,playerId='';
+
+// プレイヤーIDの生成と管理
+function generatePlayerId(){
+    const now=new Date();
+    const year=now.getFullYear();
+    const month=(now.getMonth()+1).toString().padStart(2,'0');
+    const day=now.getDate().toString().padStart(2,'0');
+    const hour=now.getHours().toString().padStart(2,'0');
+    const minute=now.getMinutes().toString().padStart(2,'0');
+    const second=now.getSeconds().toString().padStart(2,'0');
+    return`${year}${month}${day}${hour}${minute}${second}`;
+}
+
+function initializePlayerId(){
+    try{
+        playerId=localStorage.getItem('playerId');
+        if(!playerId){
+            playerId=generatePlayerId();
+            localStorage.setItem('playerId',playerId);
+        }
+    }catch(e){
+        playerId=generatePlayerId();
+    }
+}
+
+// グローバルランキングシステム
+function saveToGlobalRanking(points){
+    try{
+        let globalRanking=JSON.parse(localStorage.getItem('globalRanking')||'[]');
+        const existingIndex=globalRanking.findIndex(entry=>entry.id===playerId);
+        
+        if(existingIndex>=0){
+            if(globalRanking[existingIndex].points<points){
+                globalRanking[existingIndex].points=points;
+                globalRanking[existingIndex].lastUpdate=new Date().toISOString();
+            }
+        }else{
+            globalRanking.push({
+                id:playerId,
+                points:points,
+                lastUpdate:new Date().toISOString()
+            });
+        }
+        
+        globalRanking.sort((a,b)=>b.points-a.points);
+        globalRanking=globalRanking.slice(0,1000);
+        localStorage.setItem('globalRanking',JSON.stringify(globalRanking));
+        return globalRanking;
+    }catch(e){
+        return[];
+    }
+}
+
+function displayGlobalRanking(containerId,myRankId){
+    const globalRanking=saveToGlobalRanking(totalPoints);
+    const myRank=globalRanking.findIndex(entry=>entry.id===playerId)+1;
+    
+    $(containerId.replace('#','')).style.display="block";
+    const rankingList=$(containerId.replace('#','')+'List');
+    rankingList.innerHTML="";
+    
+    // トップ3を表示
+    const medals=["🥇","🥈","🥉"];
+    for(let i=0;i<Math.min(3,globalRanking.length);i++){
+        const rankDiv=document.createElement("div");
+        rankDiv.className="global-ranking-item";
+        if(globalRanking[i].id===playerId)rankDiv.classList.add("my-rank");
+        
+        rankDiv.innerHTML=`
+            <span><span class="rank-medal">${medals[i]}</span>${i+1}位</span>
+            <span>ID: ${globalRanking[i].id}</span>
+            <span>${globalRanking[i].points}P</span>
+        `;
+        rankingList.appendChild(rankDiv);
+    }
+    
+    // 自分の順位を表示
+    const myRankDiv=$(myRankId.replace('#',''));
+    myRankDiv.innerHTML=`
+        <div class="global-ranking-item my-rank">
+            <span><strong>${myRank}位</strong></span>
+            <span><strong>ID: ${playerId}</strong></span>
+            <span><strong>${totalPoints}P</strong></span>
+        </div>
+    `;
+}
+
+// 隠しステージの厳格な制御
+function enableHiddenStage(){hiddenStageAvailable=true;$("hiddenStageBtn").style.display="inline-block";$("hiddenModeInfo").style.display="block"}
+function disableHiddenStage(){hiddenStageAvailable=false;$("hiddenStageBtn").style.display="none";$("hiddenModeInfo").style.display="none"}
+
+try{totalPoints=parseInt(localStorage.getItem('totalPoints')||'0')}catch(e){}
 const titles={fractionMaster:{name:"分数マスター",description:"隠しステージを制覇した真の分数の達人",unlocked:false}};
 
-window.addEventListener('load',()=>{if(hiddenStageUnlocked){$("hiddenStageBtn").style.display="inline-block";$("hiddenModeInfo").style.display="block"}if(totalPoints>0){$("pointsDisplay").style.display="block";$("totalPoints").textContent=totalPoints}});
+window.addEventListener('load',()=>{
+    initializePlayerId();
+    $("playerIdDisplay").style.display="block";
+    $("playerId").textContent=playerId;
+    if(totalPoints>0){
+        $("pointsDisplay").style.display="block";
+        $("totalPoints").textContent=totalPoints;
+    }
+});
 
 const gcd=(a,b)=>b?gcd(b,a%b):a;
 const R=(min,max)=>Math.floor(Math.random()*(max-min+1))+min;
@@ -295,11 +424,9 @@ function mixedFrac(w,n,d){if(n>=d){w+=Math.floor(n/d);n=n%d}return n===0?`${w}`:
 function formatAnswer(n,d,u=""){const[sn,sd]=simplify(n,d);return sd===1?sn+u:`${sn}/${sd}`+u}
 function formatTime(s){const m=Math.floor(s/60);return`${m.toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`}
 
-// 拡張ポイントシステム
 function calculateClearPoints(clearTime){if(clearTime<=300)return 2000;else if(clearTime<=600)return 1500;else if(clearTime<=900)return 1200;else if(clearTime<=1200)return 1000;else if(clearTime<=1800)return 800;else return 500}
 function calculateLevelPoints(level){return level*50}
 function calculateCorrectPoints(level){return Math.min(level*10,100)}
-function calculateTimeBonus(timeSpent){if(timeSpent<=30)return 50;else if(timeSpent<=60)return 30;else if(timeSpent<=120)return 20;else return 10}
 function addPoints(points,showAnimation=true){totalPoints+=points;state.sessionPoints+=points;try{localStorage.setItem('totalPoints',totalPoints.toString())}catch(e){}$("totalPoints").textContent=totalPoints;$("sessionPointsValue").textContent=state.sessionPoints;$("pointsDisplay").style.display="block";$("sessionPoints").style.display="block";if(showAnimation)showPointsAnimation(points)}
 function showPointsAnimation(points){const pointsDiv=document.createElement('div');pointsDiv.innerHTML=`<div style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:linear-gradient(45deg,#ffd700,#ffed4e);color:#d32f2f;padding:20px;border-radius:15px;font-size:24px;font-weight:bold;z-index:3000;animation:pointsEarn 2s;border:3px solid #ff6b6b;">+${points}P 獲得！</div>`;document.body.appendChild(pointsDiv);setTimeout(()=>pointsDiv.remove(),2000)}
 
@@ -325,14 +452,14 @@ function generateHiddenProblem(){const patterns=[()=>{const[n1,d1]=randFrac(12,1
 function generateProblem(lv){if(state.mode==='hidden')return generateHiddenProblem();switch(lv){case 1:{const[n,d]=randFrac(9,12);const i=R(2,8);return{q:`${frac(n,d)} × ${i} =`,n:n*i,d:d,type:'fraction',mixed:false}}case 2:{const[n,d]=randFrac(8,10);const i=R(2,6);return{q:`${frac(n,d)} ÷ ${i} =`,n:n,d:d*i,type:'fraction',mixed:false}}case 3:{const[n1,d1]=randFrac(8,12);const[n2,d2]=randFrac(8,12);return{q:`${frac(n1,d1)} × ${frac(n2,d2)} =`,n:n1*n2,d:d1*d2,type:'fraction',mixed:false}}case 4:{const w1=R(1,3),d1=R(3,6),n1=R(1,d1-1);const w2=R(1,2),d2=R(3,5),n2=R(1,d2-1);const i1=w1*d1+n1,i2=w2*d2+n2;return{q:`${mixedFrac(w1,n1,d1)} × ${mixedFrac(w2,n2,d2)} =`,n:i1*i2,d:d1*d2,type:'fraction',mixed:true}}case 5:{const[n1,d1]=randFrac(6,8);const[n2,d2]=randFrac(6,8);const[n3,d3]=randFrac(6,8);return{q:`${frac(n1,d1)} × ${frac(n2,d2)} × ${frac(n3,d3)} =`,n:n1*n2*n3,d:d1*d2*d3,type:'fraction',mixed:false}}case 6:{const[n1,d1]=randFrac(8,12);const[n2,d2]=randFrac(8,12);const v1=n1/d1,v2=n2/d2;const mult=R(2,4);const patterns=[{e1:`${frac(n1,d1)} × ${frac(n2,d2)}`,e2:`${frac(n1,d1)}`,v1:v1*v2,v2:v1},{e1:`${frac(n1,d1)} × ${mult}`,e2:`${frac(n1,d1)}`,v1:v1*mult,v2:v1}];const p=patterns[R(0,1)];return{q:`${p.e1} と ${p.e2} どちらが大きいですか？<br><small>（1:左がわ 2:右がわ 3:同じ）</small>`,a:Math.abs(p.v1-p.v2)<0.0001?'equal':p.v1>p.v2?'left':'right',type:'comparison',mixed:false}}case 7:{const[n,d]=randFrac(8,12);return{q:`${frac(n,d)} の逆数を求めましょう`,n:d,d:n,type:'fraction',mixed:false}}case 8:{const patterns=[()=>{const m=R(10,50);return{q:`${m}分は何時間ですか？`,n:m,d:60,u:"時間",type:'fraction',mixed:false}},()=>{const s=R(15,120);return{q:`${s}秒は何分ですか？`,n:s,d:60,u:"分",type:'fraction',mixed:false}},()=>{const h=R(6,20);return{q:`${h}時間は何日ですか？`,n:h,d:24,u:"日",type:'fraction',mixed:false}}];return patterns[R(0,2)]()}case 9:{const patterns=[()=>{const t=R(12,24);const[n,d]=randFrac(4,8);return{q:`${t}個のお菓子の${frac(n,d)}は何個ですか？`,n:t*n,d:d,u:"個",type:'fraction',mixed:true}},()=>{const t=R(6,15);const div=R(2,5);return{q:`${t}個のりんごを${div}人で等しく分けると、1人あたり何個になりますか？`,n:t,d:div,u:"個",type:'fraction',mixed:true}},()=>{const[n,d]=randFrac(6,10);const w=R(8,20);return{q:`${w}mのリボンの${frac(n,d)}の長さは何mですか？`,n:w*n,d:d,u:"m",type:'fraction',mixed:false}}];return patterns[R(0,2)]()}default:return generateProblem(1)}}
 
 function showLevelSelect(){$("start").style.display="none";$("levelSelect").style.display="block"}
-function backToStart(){stopTimer();["start","levelSelect","game","gameover","clear","hiddenClear"].forEach(id=>$(id).style.display="none");$("start").style.display="block";$("timerDisplay").style.display="none"}
+function backToStart(){stopTimer();disableHiddenStage();["start","levelSelect","game","gameover","clear","hiddenClear"].forEach(id=>$(id).style.display="none");$("start").style.display="block";$("timerDisplay").style.display="none"}
 function restart(){backToStart()}
 
 function selectLevel(lv){state={score:0,level:lv,prob:null,unit:"",mode:"select",lvCount:0,totalQ:0,qNum:0,completed:new Set(),selectedComparison:null,selectQCount:0,startTime:null,timerInterval:null,hiddenQ:0,sessionPoints:0};$("levelSelect").style.display="none";$("game").style.display="block";updateDisplay();updateLevelIndicator();nextQ()}
 
 function backToLevelSelect(){stopTimer();$("game").style.display="none";$("levelSelect").style.display="block";$("timerDisplay").style.display="none"}
 
-function selectMode(m){if(m==='hidden')state={score:0,level:10,prob:null,unit:"",mode:"hidden",lvCount:0,totalQ:0,qNum:0,completed:new Set(),selectedComparison:null,selectQCount:0,startTime:null,timerInterval:null,hiddenQ:0,sessionPoints:0};else state={score:0,level:1,prob:null,unit:"",mode:m,lvCount:0,totalQ:0,qNum:0,completed:new Set(),selectedComparison:null,selectQCount:0,startTime:null,timerInterval:null,hiddenQ:0,sessionPoints:0};$("start").style.display="none";$("game").style.display="block";updateDisplay();updateLevelIndicator();if(m==='summary'||m==='hidden')startTimer();nextQ()}
+function selectMode(m){if(m==='hidden'&&!hiddenStageAvailable){alert('隠しステージはまとめモードをクリアした直後のみ進めます！');return}if(m==='hidden')state={score:0,level:10,prob:null,unit:"",mode:"hidden",lvCount:0,totalQ:0,qNum:0,completed:new Set(),selectedComparison:null,selectQCount:0,startTime:null,timerInterval:null,hiddenQ:0,sessionPoints:0};else state={score:0,level:1,prob:null,unit:"",mode:m,lvCount:0,totalQ:0,qNum:0,completed:new Set(),selectedComparison:null,selectQCount:0,startTime:null,timerInterval:null,hiddenQ:0,sessionPoints:0};$("start").style.display="none";$("game").style.display="block";updateDisplay();updateLevelIndicator();if(m==='summary'||m==='hidden')startTimer();nextQ()}
 
 function updateDisplay(){if(state.mode==='hidden'){$("lv").textContent="隠し";$("lvInfo").textContent="超高難度ステージ";$("monster").textContent="👑"}else{$("lv").textContent=state.level;$("lvInfo").textContent=lvNames[state.level-1];$("monster").textContent=monsters[state.level-1]}$("score").textContent=state.score;$("levelSelectBtn").style.display=state.mode==='select'?"inline-block":"none";const bar=$("progressBar");if(state.mode==='practice'){$("modeDisplay").innerHTML='<div class="mode-info practice"><strong>📚 練習モード</strong></div>';$("levelProgress").textContent=`このレベル: ${state.lvCount}/5問正解`;bar.className="progress-bar practice";bar.style.width=`${(state.lvCount/5)*100}%`;$("totalQ").style.display="none";$("hiddenQ").style.display="none"}else if(state.mode==='select'){$("modeDisplay").innerHTML='<div class="mode-info select"><strong>🎮 選べるモード</strong></div>';$("levelProgress").textContent=`問題数: ${state.selectQCount}問`;bar.className="progress-bar select";bar.style.width=`${Math.min((state.selectQCount/10)*100,100)}%`;$("totalQ").style.display="none";$("hiddenQ").style.display="none"}else if(state.mode==='hidden'){$("modeDisplay").innerHTML='<div class="mode-info hidden"><strong>👑 隠しステージ</strong></div>';$("levelProgress").textContent=`問題 ${state.hiddenQ+1}/10`;bar.className="progress-bar hidden";bar.style.width=`${(state.hiddenQ/10)*100}%`;$("totalQ").style.display="none";$("hiddenQ").style.display="inline";$("hiddenQ").textContent=" / 10問中"}else{$("modeDisplay").innerHTML='<div class="mode-info summary"><strong>🎯 まとめモード</strong></div>';$("levelProgress").textContent=`問題 ${state.totalQ+1}/45`;bar.className="progress-bar summary";bar.style.width=`${(state.totalQ/45)*100}%`;$("totalQ").style.display="inline";$("totalQ").textContent=" / 45問中";$("hiddenQ").style.display="none"}}
 
@@ -358,7 +485,7 @@ function submitComparison(){if(!state.selectedComparison){showError("選択肢�
 
 function checkAnswer(un,ud){const[cn,cd]=simplify(state.prob.n,state.prob.d);const[sn,sd]=simplify(un,ud);const userGcd=gcd(Math.abs(un),Math.abs(ud));const needsSimplification=userGcd>1;const isCorrect=sn===cn&&sd===cd&&!needsSimplification;const correctAns=formatAnswer(cn,cd,state.unit);if(needsSimplification){const[rn,rd]=simplify(un,ud);$("almostMsg").style.display="block";$("almostText").textContent=`${un}/${ud} = ${rn}/${rd}`;handleAnswer(false,correctAns);return}handleAnswer(isCorrect,correctAns)}
 
-function handleAnswer(isCorrect,correctAns){if(isCorrect){state.score++;const points=calculateCorrectPoints(state.level);addPoints(points);if(state.mode==='practice')state.lvCount++;else if(state.mode==='select')state.selectQCount++;else if(state.mode==='hidden')state.hiddenQ++;else{state.qNum++;state.totalQ++}animate("correct");setTimeout(nextQ,2000)}else{$("wrong").style.display="block";if(state.prob.type!=='comparison'){$("correctAnswer").style.display="block";$("correctText").textContent=correctAns}if(state.mode==='practice'){state.lvCount=0;$("practiceMsg").style.display="block"}else if(state.mode==='select'){$("selectMsg").style.display="block";$("backToSelectBtn").style.display="inline-block"}else{showGameOver();return}animate("wrong")}}
+function handleAnswer(isCorrect,correctAns){if(isCorrect){state.score++;const points=calculateCorrectPoints(state.level);addPoints(points);if(state.mode==='practice')state.lvCount++;else if(state.mode==='select')state.selectQCount++;else if(state.mode==='hidden')state.hiddenQ++;else{state.qNum++;state.totalQ++}animate("correct");setTimeout(nextQ,2000)}else{$("wrong").style.display="block";if(state.prob.type!=='comparison'){$("correctAnswer").style.display="block";$("correctText").textContent=correctAns}if(state.mode==='practice'){state.lvCount=0;$("practiceMsg").style.display="block"}else if(state.mode==='select'){$("selectMsg").style.display="block";$("backToSelectBtn").style.display="inline-block"}else{if(state.mode==='hidden')disableHiddenStage();showGameOver();return}animate("wrong")}}
 
 function showError(msg){$("wrongMsg").textContent=msg;$("wrong").style.display="block";$("correctAnswer").style.display="none";$("practiceMsg").style.display="none";$("selectMsg").style.display="none";$("almostMsg").style.display="none";$("backToSelectBtn").style.display="none"}
 
@@ -366,11 +493,14 @@ function retry(){$("wrong").style.display="none";$("almostMsg").style.display="n
 
 function next(){nextQ()}
 
-function showGameOver(){stopTimer();const progressPoints=state.level*20+state.score*5;addPoints(progressPoints);$("gameoverPoints").style.display="block";$("gameoverPointsValue").textContent=progressPoints;$("game").style.display="none";$("gameover").style.display="block";$("finalLv").textContent=state.mode==='hidden'?"隠し":state.level;$("finalScore1").textContent=state.score;if(state.mode==='summary'||state.mode==='hidden'){const elapsedTime=getElapsedTime();$("finalTime").style.display="block";$("finalTimeValue").textContent=formatTime(elapsedTime)}}
+function showGameOver(){stopTimer();const progressPoints=state.level*20+state.score*5;addPoints(progressPoints);$("gameoverPoints").style.display="block";$("gameoverPointsValue").textContent=progressPoints;displayGlobalRanking('#globalRankingGameover','#myGlobalRankGameover');$("game").style.display="none";$("gameover").style.display="block";$("finalLv").textContent=state.mode==='hidden'?"隠し":state.level;$("finalScore1").textContent=state.score;if(state.mode==='summary'||state.mode==='hidden'){const elapsedTime=getElapsedTime();$("finalTime").style.display="block";$("finalTimeValue").textContent=formatTime(elapsedTime)}}
 
-function showClear(){stopTimer();createFireworks();$("game").style.display="none";$("clear").style.display="block";$("finalScore2").textContent=state.score;if(state.mode==='summary'){hiddenStageUnlocked=true;try{localStorage.setItem('hiddenStageUnlocked','true')}catch(e){}$("hiddenStageBtn").style.display="inline-block";$("hiddenModeInfo").style.display="block";$("hiddenStageUnlock").style.display="block";const elapsedTime=getElapsedTime();$("clearTimeValue").textContent=formatTime(elapsedTime);displayRanking(elapsedTime)}}
+function showClear(){stopTimer();createFireworks();$("game").style.display="none";$("clear").style.display="block";$("finalScore2").textContent=state.score;if(state.mode==='summary'){enableHiddenStage();$("hiddenStageUnlock").style.display="block";const elapsedTime=getElapsedTime();$("clearTimeValue").textContent=formatTime(elapsedTime);displayRanking(elapsedTime)}displayGlobalRanking('#globalRankingClear','#myGlobalRankClear')}
 
-function showHiddenClear(){stopTimer();createMasterFireworks();const hiddenPoints=3000;addPoints(hiddenPoints);$("hiddenPointsEarned").style.display="block";$("hiddenEarnedPoints").textContent=hiddenPoints;unlockTitle('fractionMaster');$("game").style.display="none";$("hiddenClear").style.display="block";$("hiddenFinalScore").textContent=state.score}
+function showHiddenClear(){stopTimer();createMasterFireworks();disableHiddenStage();const hiddenPoints=3000;addPoints(hiddenPoints);$("hiddenPointsEarned").style.display="block";$("hiddenEarnedPoints").textContent=hiddenPoints;displayGlobalRanking('#globalRankingHidden','#myGlobalRankHidden');unlockTitle('fractionMaster');$("game").style.display="none";$("hiddenClear").style.display="block";$("hiddenFinalScore").textContent=state.score}
 
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.tagName==='INPUT'){e.preventDefault();if(e.target.id==='n'||e.target.id==='d')submitFraction();else if(['mw','mn','md'].includes(e.target.id))submitMixed();else if(e.target.id==='norm')submitNormal()}if(state.prob?.type==='comparison'){if(e.key==='1'){const btn=document.querySelector('.comparison-btn[onclick*="left"]');if(btn)selectComparison(btn,'left')}else if(e.key==='2'){const btn=document.querySelector('.comparison-btn[onclick*="right"]');if(btn)selectComparison(btn,'right')}else if(e.key==='3'){const btn=document.querySelector('.comparison-btn[onclick*="equal"]');if(btn)selectComparison(btn,'equal')}else if(e.key==='Enter'&&state.selectedComparison)submitComparison()}});
 </script>
+</body>
+</html>
+
