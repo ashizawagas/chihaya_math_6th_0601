@@ -3,6 +3,34 @@
 <head>
 <meta charset="UTF-8">
 <title>千早算数クエスト - 6年生分数版</title>
+
+<!-- Firebase SDK -->
+<script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+    import { getFirestore, collection, doc, setDoc, getDocs, query, orderBy, limit, serverTimestamp, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+    // Firebase設定
+    const firebaseConfig = {
+        apiKey: "AIzaSyBxis_hmhvm9CR8xea8trCsMWltL-B343I",
+        authDomain: "chihayamath6th0601.firebaseapp.com",
+        projectId: "chihayamath6th0601",
+        storageBucket: "chihayamath6th0601.firebasestorage.app",
+        messagingSenderId: "537279903794",
+        appId: "1:537279903794:web:830a1f9ab8a4078ef7642b",
+        measurementId: "G-ZQJ6W66F3J"
+    };
+
+    // Firebaseの初期化
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    
+    // グローバル変数として設定
+    window.db = db;
+    window.firestore = { collection, doc, setDoc, getDocs, query, orderBy, limit, serverTimestamp, getDoc };
+    
+    console.log('Firebase初期化完了');
+</script>
+
 <style>
 body{font-family:Arial;text-align:center;background:#f0f8ff;margin:0;padding:20px}
 .monster{font-size:80px;transition:transform .3s;margin:20px 0}
@@ -127,6 +155,9 @@ input:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,243
 <button class="mode-btn practice" onclick="selectMode('practice')">📚 練習モード</button>
 <button class="mode-btn" onclick="selectMode('summary')">🎯 まとめモード</button>
 <button id="hiddenStageBtn" class="mode-btn hidden" onclick="selectMode('hidden')" style="display:none">👑 隠しステージ</button>
+<div style="margin-top: 20px;">
+    <button onclick="displayFirebaseRanking()">🌍 グローバルランキング表示</button>
+</div>
 </div>
 
 <div id="levelSelect" style="display:none">
@@ -306,6 +337,159 @@ input:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,243
 <div id="celebration" class="correct-celebration"></div>
 
 <script>
+// Firebase関連の関数
+async function savePlayerScore(playerId, points) {
+    try {
+        const playerRef = window.firestore.doc(window.db, 'players', playerId);
+        
+        // 既存のスコアを確認
+        const docSnap = await window.firestore.getDoc(playerRef);
+        let shouldUpdate = true;
+        
+        if (docSnap.exists()) {
+            const existingPoints = docSnap.data().totalPoints || 0;
+            // 既存のスコアより高い場合のみ更新
+            shouldUpdate = points > existingPoints;
+        }
+        
+        if (shouldUpdate) {
+            await window.firestore.setDoc(playerRef, {
+                playerId: playerId,
+                totalPoints: points,
+                lastUpdate: window.firestore.serverTimestamp()
+            }, { merge: true });
+            
+            console.log('スコアが保存されました:', points);
+            return true;
+        } else {
+            console.log('既存のスコアの方が高いため更新しませんでした');
+            return false;
+        }
+    } catch (error) {
+        console.error('スコア保存エラー:', error);
+        return false;
+    }
+}
+
+// トップランキングを取得
+async function fetchTopRanking(limitCount = 10) {
+    try {
+        const rankingQuery = window.firestore.query(
+            window.firestore.collection(window.db, 'players'),
+            window.firestore.orderBy('totalPoints', 'desc'),
+            window.firestore.limit(limitCount)
+        );
+        
+        const querySnapshot = await window.firestore.getDocs(rankingQuery);
+        const rankings = [];
+        
+        querySnapshot.forEach((doc, index) => {
+            const data = doc.data();
+            rankings.push({
+                rank: index + 1,
+                playerId: data.playerId,
+                totalPoints: data.totalPoints,
+                lastUpdate: data.lastUpdate
+            });
+        });
+        
+        return rankings;
+    } catch (error) {
+        console.error('ランキング取得エラー:', error);
+        return [];
+    }
+}
+
+// プレイヤーの順位を取得
+async function getPlayerRank(playerId, playerPoints) {
+    try {
+        const allPlayersQuery = window.firestore.query(
+            window.firestore.collection(window.db, 'players'),
+            window.firestore.orderBy('totalPoints', 'desc')
+        );
+        
+        const querySnapshot = await window.firestore.getDocs(allPlayersQuery);
+        let rank = 1;
+        
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            if (data.totalPoints > playerPoints) {
+                rank++;
+            }
+        });
+        
+        return rank;
+    } catch (error) {
+        console.error('順位取得エラー:', error);
+        return null;
+    }
+}
+
+// Firebaseランキング表示
+async function displayFirebaseRanking() {
+    const rankings = await fetchTopRanking(10);
+    const myRank = await getPlayerRank(playerId, totalPoints);
+    
+    // ランキング表示用のダイアログを作成
+    const rankingDialog = document.createElement('div');
+    rankingDialog.style.cssText = `
+        position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
+        background: rgba(0,0,0,0.8); z-index: 2000; 
+        display: flex; align-items: center; justify-content: center;
+    `;
+    
+    let rankingHTML = `
+        <div style="background: white; padding: 30px; border-radius: 15px; max-width: 500px; width: 90%;">
+            <h2 style="color: #f57c00; margin-bottom: 20px; text-align: center;">🌍 グローバルランキング</h2>
+    `;
+    
+    if (rankings.length === 0) {
+        rankingHTML += '<p style="text-align: center;">ランキングデータがありません</p>';
+    } else {
+        const medals = ["🥇", "🥈", "🥉"];
+        rankings.forEach((ranking, index) => {
+            const medal = index < 3 ? medals[index] : `${ranking.rank}位`;
+            const isMyRank = ranking.playerId === playerId ? 'background: #e8f5e8; border: 2px solid #4caf50; font-weight: bold;' : 'background: #fff8e1;';
+            
+            rankingHTML += `
+                <div style="display: flex; justify-content: space-between; align-items: center; 
+                           padding: 10px 15px; margin: 5px 0; border-radius: 5px; ${isMyRank}">
+                    <span><span style="font-size: 18px; margin-right: 10px;">${medal}</span></span>
+                    <span>ID: ${ranking.playerId}</span>
+                    <span>${ranking.totalPoints}P</span>
+                </div>
+            `;
+        });
+        
+        // 自分の順位を表示
+        rankingHTML += `
+            <div style="margin-top: 20px; padding-top: 15px; border-top: 2px solid #ddd;">
+                <h4 style="text-align: center; color: #333;">あなたの順位</h4>
+                <div style="display: flex; justify-content: space-between; align-items: center; 
+                           padding: 10px 15px; margin: 5px 0; border-radius: 5px; 
+                           background: #e8f5e8; border: 2px solid #4caf50; font-weight: bold;">
+                    <span><strong>${myRank || '圏外'}位</strong></span>
+                    <span><strong>ID: ${playerId}</strong></span>
+                    <span><strong>${totalPoints}P</strong></span>
+                </div>
+            </div>
+        `;
+    }
+    
+    rankingHTML += `
+            <button onclick="this.parentElement.parentElement.remove()" 
+                    style="margin-top: 20px; padding: 12px 24px; font-size: 16px; 
+                           background: #4CAF50; color: white; border: none; border-radius: 8px; 
+                           cursor: pointer; display: block; margin-left: auto; margin-right: auto;">
+                閉じる
+            </button>
+        </div>
+    `;
+    
+    rankingDialog.innerHTML = rankingHTML;
+    document.body.appendChild(rankingDialog);
+}
+
 const $=id=>document.getElementById(id)||{style:{},textContent:'',innerHTML:'',value:'',classList:{add:()=>{},remove:()=>{}},appendChild:()=>{},remove:()=>{},focus:()=>{}};
 let state={score:0,level:1,prob:null,unit:"",mode:"",lvCount:0,totalQ:0,qNum:0,completed:new Set(),selectedComparison:null,selectQCount:0,startTime:null,timerInterval:null,hiddenQ:0,sessionPoints:0};
 const monsters=["📊","🔢","🔲","🔄","⭐","⚖️","💡","🏃","👑"];
@@ -336,7 +520,7 @@ function initializePlayerId(){
     }
 }
 
-// グローバルランキングシステム
+// グローバルランキングシステム（ローカル用・バックアップ）
 function saveToGlobalRanking(points){
     try{
         let globalRanking=JSON.parse(localStorage.getItem('globalRanking')||'[]');
@@ -448,7 +632,7 @@ function calculateCorrectPoints(level,mode){
     else return basePoints; // まとめモード（変更なし）
 }
 
-function addPoints(points,showAnimation=true){
+async function addPoints(points,showAnimation=true){
     totalPoints+=points;
     state.sessionPoints+=points;
     try{localStorage.setItem('totalPoints',totalPoints.toString())}catch(e){}
@@ -456,6 +640,10 @@ function addPoints(points,showAnimation=true){
     $("sessionPointsValue").textContent=state.sessionPoints;
     $("pointsDisplay").style.display="block";
     $("sessionPoints").style.display="block";
+    
+    // Firebaseにスコアを送信
+    await savePlayerScore(playerId, totalPoints);
+    
     if(showAnimation)showPointsAnimation(points);
 }
 
@@ -492,136 +680,6 @@ function getElapsedTime(){
     return state.startTime?Math.floor((Date.now()-state.startTime)/1000):0;
 }
 
-function saveRanking(time){
-    try{
-        let rankings=JSON.parse(localStorage.getItem('fractionQuestRankings')||'[]');
-        rankings.push({time,date:new Date().toISOString(),points:calculateClearPoints(time)});
-        rankings.sort((a,b)=>a.time-b.time);
-        rankings=rankings.slice(0,100);
-        localStorage.setItem('fractionQuestRankings',JSON.stringify(rankings));
-        return rankings;
-    }catch(e){
-        return[];
-    }
-}
-
-function displayRanking(currentTime){
-    const rankings=saveRanking(currentTime);
-    const currentRank=rankings.findIndex(r=>r.time===currentTime)+1;
-    $("rankingDisplay").style.display="block";
-    const rankingList=$("rankingList");
-    rankingList.innerHTML="";
-    const medals=["🥇","🥈","🥉"];
-    for(let i=0;i<Math.min(3,rankings.length);i++){
-        const rankDiv=document.createElement("div");
-        rankDiv.className="ranking-item top3";
-        rankDiv.innerHTML=`<span><span class="rank-medal">${medals[i]}</span>${i+1}位</span><span>${formatTime(rankings[i].time)}</span><span>${rankings[i].points}P</span>`;
-        rankingList.appendChild(rankDiv);
-    }
-    const myRankingItem=$("myRankingItem");
-    myRankingItem.innerHTML=`<div class="ranking-item current"><span><strong>あなたの順位: ${currentRank}位</strong></span><span><strong>${formatTime(currentTime)}</strong></span><span><strong>${calculateClearPoints(currentTime)}P</strong></span></div>`;
-    const earnedPoints=calculateClearPoints(currentTime);
-    $("pointsEarned").style.display="block";
-    $("earnedPoints").textContent=earnedPoints;
-    addPoints(earnedPoints);
-}
-
-function createFireworks(){
-    const celebration=$("celebration");
-    celebration.innerHTML="";
-    for(let i=0;i<15;i++){
-        setTimeout(()=>{
-            const firework=document.createElement("div");
-            firework.className="firework";
-            firework.style.left=Math.random()*window.innerWidth+"px";
-            firework.style.top=Math.random()*window.innerHeight+"px";
-            firework.style.background=`radial-gradient(circle, hsl(${Math.random()*360}, 100%, 50%), hsl(${Math.random()*360}, 100%, 70%))`;
-            celebration.appendChild(firework);
-            setTimeout(()=>firework.remove(),2000);
-        },i*100);
-    }
-    for(let i=0;i<30;i++){
-        setTimeout(()=>{
-            const sparkle=document.createElement("div");
-            sparkle.className="sparkle";
-            sparkle.style.left=Math.random()*window.innerWidth+"px";
-            sparkle.style.top=Math.random()*window.innerHeight+"px";
-            celebration.appendChild(sparkle);
-            setTimeout(()=>sparkle.remove(),1500);
-        },i*50);
-    }
-}
-
-function createMasterFireworks(){
-    const celebration=$("celebration");
-    celebration.innerHTML="";
-    for(let i=0;i<50;i++){
-        setTimeout(()=>{
-            const firework=document.createElement("div");
-            firework.className="firework";
-            firework.style.left=Math.random()*window.innerWidth+"px";
-            firework.style.top=Math.random()*window.innerHeight+"px";
-            firework.style.background=`radial-gradient(circle, hsl(${Math.random()*360}, 100%, 50%), hsl(${(Math.random()*360+180)%360}, 100%, 70%))`;
-            firework.style.animation=`firework ${2+Math.random()}s ease-out forwards`;
-            celebration.appendChild(firework);
-            setTimeout(()=>firework.remove(),3000);
-        },i*50);
-    }
-    for(let i=0;i<100;i++){
-        setTimeout(()=>{
-            const star=document.createElement("div");
-            star.innerHTML="⭐";
-            star.style.position="absolute";
-            star.style.left=Math.random()*window.innerWidth+"px";
-            star.style.top=Math.random()*window.innerHeight+"px";
-            star.style.fontSize=(10+Math.random()*20)+"px";
-            star.style.animation=`sparkle ${1+Math.random()}s ease-out infinite`;
-            star.style.pointerEvents="none";
-            celebration.appendChild(star);
-            setTimeout(()=>star.remove(),3000);
-        },i*30);
-    }
-}
-
-function unlockTitle(titleKey){
-    if(titles[titleKey]){
-        titles[titleKey].unlocked=true;
-        try{localStorage.setItem(`title_${titleKey}`,'true')}catch(e){}
-        showTitleUnlock(titles[titleKey]);
-    }
-}
-
-function showTitleUnlock(title){
-    const titleDiv=document.createElement('div');
-    titleDiv.innerHTML=`<div style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);z-index:2000;display:flex;align-items:center;justify-content:center"><div style="background:linear-gradient(45deg,#ffd700,#ffed4e);padding:40px;border-radius:20px;text-align:center;border:5px solid #ff6b6b;animation:titleGlow 2s infinite"><h1 style="color:#d32f2f;font-size:36px;margin:0;text-shadow:2px 2px 4px rgba(0,0,0,0.5)">🏆 称号獲得！ 🏆</h1><div style="font-size:48px;margin:20px 0">👑</div><h2 style="color:#1976d2;font-size:28px;margin:10px 0">${title.name}</h2><p style="color:#333;font-size:16px;margin:0">${title.description}</p><button onclick="this.parentElement.parentElement.remove()" style="margin-top:20px;padding:12px 24px;font-size:18px;background:#4CAF50;color:white;border:none;border-radius:8px;cursor:pointer">確認</button></div></div>`;
-    document.body.appendChild(titleDiv);
-}
-
-function generateHiddenProblem(){
-    const patterns=[
-        ()=>{
-            const[n1,d1]=randFrac(12,15);
-            const[n2,d2]=randFrac(12,15);
-            const[n3,d3]=randFrac(8,12);
-            return{q:`${frac(n1,d1)} × ${frac(n2,d2)} ÷ ${frac(n3,d3)} =`,n:n1*n2*d3,d:d1*d2*n3,type:'fraction',mixed:true};
-        },
-        ()=>{
-            const w1=R(2,5),d1=R(4,8),n1=R(1,d1-1);
-            const w2=R(1,4),d2=R(3,7),n2=R(1,d2-1);
-            const w3=R(1,3),d3=R(2,6),n3=R(1,d3-1);
-            const i1=w1*d1+n1,i2=w2*d2+n2,i3=w3*d3+n3;
-            return{q:`${mixedFrac(w1,n1,d1)} × ${mixedFrac(w2,n2,d2)} ÷ ${mixedFrac(w3,n3,d3)} =`,n:i1*i2*d3,d:d1*d2*i3,type:'fraction',mixed:true};
-        },
-        ()=>{
-            const total=R(24,48);
-            const[n1,d1]=randFrac(6,12);
-            const[n2,d2]=randFrac(4,8);
-            return{q:`${total}個のお菓子があります。最初に全体の${frac(n1,d1)}を食べ、残りの${frac(n2,d2)}をさらに食べました。最後に残ったお菓子は何個ですか？`,n:total*(d1*d2-n1*d2-(d1-n1)*n2),d:d1*d2,u:"個",type:'fraction',mixed:true};
-        }
-    ];
-    return patterns[R(0,2)]();
-}
-
 function generateProblem(lv){
     if(state.mode==='hidden')return generateHiddenProblem();
     switch(lv){
@@ -655,225 +713,202 @@ function generateProblem(lv){
         case 6:{
             const[n1,d1]=randFrac(8,12);
             const[n2,d2]=randFrac(8,12);
-            const v1=n1/d1,v2=n2/d2;
-            const mult=R(2,4);
-            const patterns=[
-                {e1:`${frac(n1,d1)} × ${frac(n2,d2)}`,e2:`${frac(n1,d1)}`,v1:v1*v2,v2:v1},
-                {e1:`${frac(n1,d1)} × ${mult}`,e2:`${frac(n1,d1)}`,v1:v1*mult,v2:v1}
-            ];
-            const p=patterns[R(0,1)];
-            return{q:`${p.e1} と ${p.e2} どちらが大きいですか？<br><small>（1:左がわ 2:右がわ 3:同じ）</small>`,a:Math.abs(p.v1-p.v2)<0.0001?'equal':p.v1>p.v2?'left':'right',type:'comparison',mixed:false};
+            return{q:`${frac(n1,d1)} と ${frac(n2,d2)} の大きさを比べてください`,left:n1*d2,right:n2*d1,type:'comparison'};
         }
         case 7:{
             const[n,d]=randFrac(8,12);
-            return{q:`${frac(n,d)} の逆数を求めましょう`,n:d,d:n,type:'fraction',mixed:false};
+            return{q:`${frac(n,d)} の逆数は？`,n:d,d:n,type:'fraction',mixed:false};
         }
         case 8:{
-            const patterns=[
-                ()=>{
-                    const m=R(10,50);
-                    return{q:`${m}分は何時間ですか？`,n:m,d:60,u:"時間",type:'fraction',mixed:false};
-                },
-                ()=>{
-                    const s=R(15,120);
-                    return{q:`${s}秒は何分ですか？`,n:s,d:60,u:"分",type:'fraction',mixed:false};
-                },
-                ()=>{
-                    const h=R(6,20);
-                    return{q:`${h}時間は何日ですか？`,n:h,d:24,u:"日",type:'fraction',mixed:false};
-                }
-            ];
-            return patterns[R(0,2)]();
+            const hours=R(1,3);
+            const[n,d]=randFrac(6,12);
+            return{q:`${hours}時間の${frac(n,d)}は何分ですか？`,n:hours*60*n,d:d,u:"分",type:'fraction',mixed:false};
         }
         case 9:{
-            const patterns=[
-                ()=>{
-                    const t=R(12,24);
-                    const[n,d]=randFrac(4,8);
-                    return{q:`${t}個のお菓子の${frac(n,d)}は何個ですか？`,n:t*n,d:d,u:"個",type:'fraction',mixed:true};
-                },
-                ()=>{
-                    const t=R(6,15);
-                    const div=R(2,5);
-                    return{q:`${t}個のりんごを${div}人で等しく分けると、1人あたり何個になりますか？`,n:t,d:div,u:"個",type:'fraction',mixed:true};
-                },
-                ()=>{
-                    const[n,d]=randFrac(6,10);
-                    const w=R(8,20);
-                    return{q:`${w}mのリボンの${frac(n,d)}の長さは何mですか？`,n:w*n,d:d,u:"m",type:'fraction',mixed:false};
-                }
-            ];
-            return patterns[R(0,2)]();
+            const total=R(20,40);
+            const[n,d]=randFrac(6,12);
+            return{q:`${total}個のりんごの${frac(n,d)}を食べました。残りは何個ですか？`,n:total*(d-n),d:d,u:"個",type:'fraction',mixed:false};
         }
-        default:return generateProblem(1);
     }
 }
 
-function showLevelSelect(){$("start").style.display="none";$("levelSelect").style.display="block"}
-function backToStart(){stopTimer();disableHiddenStage();["start","levelSelect","game","gameover","clear","hiddenClear"].forEach(id=>$(id).style.display="none");$("start").style.display="block";$("timerDisplay").style.display="none"}
-function restart(){backToStart()}
-
-function selectLevel(lv){
-    state={score:0,level:lv,prob:null,unit:"",mode:"select",lvCount:0,totalQ:0,qNum:0,completed:new Set(),selectedComparison:null,selectQCount:0,startTime:null,timerInterval:null,hiddenQ:0,sessionPoints:0};
-    $("levelSelect").style.display="none";
-    $("game").style.display="block";
-    updateDisplay();
-    updateLevelIndicator();
-    nextQ();
-}
-
-function backToLevelSelect(){stopTimer();$("game").style.display="none";$("levelSelect").style.display="block";$("timerDisplay").style.display="none"}
-
-function selectMode(m){
-    if(m==='hidden'&&!hiddenStageAvailable){alert('隠しステージはまとめモードをクリアした直後のみ進めます！');return}
-    if(m==='hidden')state={score:0,level:10,prob:null,unit:"",mode:"hidden",lvCount:0,totalQ:0,qNum:0,completed:new Set(),selectedComparison:null,selectQCount:0,startTime:null,timerInterval:null,hiddenQ:0,sessionPoints:0};
-    else state={score:0,level:1,prob:null,unit:"",mode:m,lvCount:0,totalQ:0,qNum:0,completed:new Set(),selectedComparison:null,selectQCount:0,startTime:null,timerInterval:null,hiddenQ:0,sessionPoints:0};
-    $("start").style.display="none";
-    $("game").style.display="block";
-    updateDisplay();
-    updateLevelIndicator();
-    if(m==='summary'||m==='hidden')startTimer();
-    nextQ();
-}
-
-function updateDisplay(){
-    if(state.mode==='hidden'){
-        $("lv").textContent="隠し";
-        $("lvInfo").textContent="超高難度ステージ";
-        $("monster").textContent="👑";
-    }else{
-        $("lv").textContent=state.level;
-        $("lvInfo").textContent=lvNames[state.level-1];
-        $("monster").textContent=monsters[state.level-1];
-    }
-    $("score").textContent=state.score;
-    $("levelSelectBtn").style.display=state.mode==='select'?"inline-block":"none";
-    const bar=$("progressBar");
-    if(state.mode==='practice'){
-        $("modeDisplay").innerHTML='<div class="mode-info practice"><strong>📚 練習モード</strong></div>';
-        $("levelProgress").textContent=`このレベル: ${state.lvCount}/5問正解`;
-        bar.className="progress-bar practice";
-        bar.style.width=`${(state.lvCount/5)*100}%`;
-        $("totalQ").style.display="none";
-        $("hiddenQ").style.display="none";
-    }else if(state.mode==='select'){
-        $("modeDisplay").innerHTML='<div class="mode-info select"><strong>🎮 選べるモード</strong></div>';
-        $("levelProgress").textContent=`問題数: ${state.selectQCount}問`;
-        bar.className="progress-bar select";
-        bar.style.width=`${Math.min((state.selectQCount/10)*100,100)}%`;
-        $("totalQ").style.display="none";
-        $("hiddenQ").style.display="none";
-    }else if(state.mode==='hidden'){
-        $("modeDisplay").innerHTML='<div class="mode-info hidden"><strong>👑 隠しステージ</strong></div>';
-        $("levelProgress").textContent=`問題 ${state.hiddenQ+1}/10`;
-        bar.className="progress-bar hidden";
-        bar.style.width=`${(state.hiddenQ/10)*100}%`;
-        $("totalQ").style.display="none";
-        $("hiddenQ").style.display="inline";
-        $("hiddenQ").textContent=" / 10問中";
-    }else{
-        $("modeDisplay").innerHTML='<div class="mode-info summary"><strong>🎯 まとめモード</strong></div>';
-        $("levelProgress").textContent=`問題 ${state.totalQ+1}/45`;
-        bar.className="progress-bar summary";
-        bar.style.width=`${(state.totalQ/45)*100}%`;
-        $("totalQ").style.display="inline";
-        $("totalQ").textContent=" / 45問中";$("hiddenQ").style.display="none"}}
-
-function updateLevelIndicator(){
-    const ind=$("levelIndicator");
-    if(state.mode==='hidden'){
-        ind.innerHTML="";
-        return;
-    }
-    ind.innerHTML="";
-    for(let i=1;i<=9;i++){
-        const dot=document.createElement("div");
-        dot.className="level-dot";
-        dot.textContent=i;
-        if(state.completed.has(i))dot.classList.add("completed");
-        else if(i===state.level)dot.classList.add("current");
-        ind.appendChild(dot);
-    }
-}
-
-function nextQ(){
-    if(state.mode==='hidden'){
-        if(state.hiddenQ>=10){
-            showHiddenClear();
-            return;
-        }
-    }else if(state.mode==='practice'){
-        if(state.lvCount>=5){
-            state.completed.add(state.level);
-            addPoints(calculateLevelPoints(state.level,state.mode));
-            if(state.level>=9){
-                showClear();
-                return;
-            }
-            state.level++;
-            state.lvCount=0;
-            animate("level-up");
-            updateLevelIndicator();
-        }
-    }else if(state.mode!=='select'){
-        if(state.level>=9&&state.qNum>=5){
-            showClear();
-            return;
-        }
-        if(state.qNum>=5){
-            state.completed.add(state.level);
-            addPoints(calculateLevelPoints(state.level,state.mode));
-            state.level++;
-            state.qNum=0;
-            animate("level-up");
-            updateLevelIndicator();
-        }
-    }
-    
+function newProblem(){
     state.prob=generateProblem(state.level);
-    state.selectedComparison=null;
-    $("q").innerHTML=state.prob.q;
     state.unit=state.prob.u||"";
-    clearInputs();
-    $("wrong").style.display="none";
+    $("q").innerHTML=state.prob.q;
+    $("monster").textContent=monsters[state.level-1];
+    $("lv").textContent=state.level;
+    $("lvInfo").textContent=lvNames[state.level-1];
     
+    // 単位表示の更新
+    if(state.unit){
+        $("fUnit").textContent=state.unit;
+        $("mUnit").textContent=state.unit;
+        $("nUnit").textContent=state.unit;
+        $("fUnit").style.display="block";
+        $("mUnit").style.display="block";
+        $("nUnit").style.display="block";
+    }else{
+        $("fUnit").style.display="none";
+        $("mUnit").style.display="none";
+        $("nUnit").style.display="none";
+    }
+    
+    // 入力フィールドのクリア
+    $("n").value="";
+    $("d").value="";
+    $("mw").value="";
+    $("mn").value="";
+    $("md").value="";
+    $("norm").value="";
+    
+    // 表示の制御
     if(state.prob.type==='comparison'){
         $("answerSections").style.display="none";
         $("comparisonInput").style.display="block";
+        state.selectedComparison=null;
         document.querySelectorAll('.comparison-btn').forEach(btn=>btn.classList.remove('selected'));
     }else{
         $("answerSections").style.display="flex";
         $("comparisonInput").style.display="none";
+        $("mixedSection").style.display=state.prob.mixed?"block":"none";
     }
     
-    $("mixedSection").style.display=state.prob.mixed?"block":"none";
-    const show=state.unit?"block":"none";
-    ["fUnit","mUnit","nUnit"].forEach(id=>{
-        $(id).textContent=state.unit;
-        $(id).style.display=show;
-    });
+    $("wrong").style.display="none";
+    $("n").focus();
+}
+
+function selectMode(mode){
+    state.mode=mode;
+    state.score=0;
+    state.level=1;
+    state.lvCount=0;
+    state.totalQ=0;
+    state.qNum=0;
+    state.hiddenQ=0;
+    state.sessionPoints=0;
+    state.completed=new Set();
     
-    updateDisplay();
-    setFocus();
+    if(mode==='hidden'&&!hiddenStageAvailable){
+        alert('隠しステージはまとめモードをクリアすると解放されます！');
+        return;
+    }
+    
+    $("start").style.display="none";
+    $("levelSelect").style.display="none";
+    $("game").style.display="block";
+    
+    updateLevelIndicator();
+    updateProgressBar();
+    updateModeDisplay();
+    
+    if(mode==='select'){
+        $("levelSelectBtn").style.display="inline-block";
+    }else{
+        $("levelSelectBtn").style.display="none";
+    }
+    
+    if(mode==='summary'){
+        $("totalQ").style.display="inline";
+    }else if(mode==='hidden'){
+        $("hiddenQ").style.display="inline";
+    }else{
+        $("totalQ").style.display="none";
+        $("hiddenQ").style.display="none";
+    }
+    
+    startTimer();
+    newProblem();
 }
 
-function clearInputs(){
-    ["n","d","mw","mn","md","norm"].forEach(id=>$(id).value="");
+function selectLevel(level){
+    state.level=level;
+    selectMode('select');
 }
 
-function animate(cls){
-    $("monster").classList.add(cls);
-    if(cls==="correct")createFireworks();
-    setTimeout(()=>$("monster").classList.remove(cls),cls==="level-up"?3000:1500);
+function showLevelSelect(){
+    $("start").style.display="none";
+    $("levelSelect").style.display="block";
 }
 
-function setFocus(){
-    setTimeout(()=>{
-        if(state.prob?.type!=='comparison'){
-            const input=$("mixedSection").style.display==="block"?$("md"):$("d");
-            input.focus();
+function backToStart(){
+    stopTimer();
+    $("start").style.display="block";
+    $("levelSelect").style.display="none";
+    $("game").style.display="none";
+    $("gameover").style.display="none";
+    $("clear").style.display="none";
+    $("hiddenClear").style.display="none";
+}
+
+function backToLevelSelect(){
+    $("levelSelect").style.display="block";
+    $("game").style.display="none";
+}
+
+function updateLevelIndicator(){
+    const indicator=$("levelIndicator");
+    indicator.innerHTML="";
+    
+    if(state.mode==='hidden'){
+        for(let i=1;i<=10;i++){
+            const dot=document.createElement("div");
+            dot.className="level-dot";
+            dot.textContent=i;
+            if(i<=state.hiddenQ)dot.classList.add("completed");
+            if(i===state.hiddenQ+1)dot.classList.add("current");
+            indicator.appendChild(dot);
         }
-    },150);
+    }else{
+        for(let i=1;i<=9;i++){
+            const dot=document.createElement("div");
+            dot.className="level-dot";
+            dot.textContent=i;
+            if(state.completed.has(i))dot.classList.add("completed");
+            if(i===state.level)dot.classList.add("current");
+            indicator.appendChild(dot);
+        }
+    }
+}
+
+function updateProgressBar(){
+    const progressBar=$("progressBar");
+    progressBar.className=`progress-bar ${state.mode}`;
+    
+    if(state.mode==='practice'){
+        const progress=(state.lvCount/5)*100;
+        progressBar.style.width=progress+"%";
+        $("levelProgress").textContent=`このレベル: ${state.lvCount}/5問正解`;
+    }else if(state.mode==='summary'){
+        const progress=(state.totalQ/45)*100;
+        progressBar.style.width=progress+"%";
+        $("levelProgress").textContent=`全体進捗: ${state.totalQ}/45問`;
+    }else if(state.mode==='hidden'){
+        const progress=(state.hiddenQ/10)*100;
+        progressBar.style.width=progress+"%";
+        $("levelProgress").textContent=`隠しステージ: ${state.hiddenQ}/10問`;
+    }else{
+        progressBar.style.width="0%";
+        $("levelProgress").textContent=`選択モード: ${state.selectQCount}問挑戦`;
+    }
+}
+
+function updateModeDisplay(){
+    const modeDisplay=$("modeDisplay");
+    switch(state.mode){
+        case 'practice':
+            modeDisplay.innerHTML='<div class="mode-info practice"><strong>📚 練習モード</strong><br>5問連続正解でレベルアップ！</div>';
+            break;
+        case 'summary':
+            modeDisplay.innerHTML='<div class="mode-info summary"><strong>🎯 まとめモード</strong><br>全45問ノーミスでクリア！</div>';
+            break;
+        case 'select':
+            modeDisplay.innerHTML='<div class="mode-info select"><strong>🎮 選択モード</strong><br>好きなレベルで練習！</div>';
+            break;
+        case 'hidden':
+            modeDisplay.innerHTML='<div class="mode-info hidden"><strong>👑 隠しステージ</strong><br>超高難度の分数問題に挑戦！</div>';
+            break;
+    }
 }
 
 function selectComparison(btn,choice){
@@ -882,218 +917,282 @@ function selectComparison(btn,choice){
     state.selectedComparison=choice;
 }
 
+function submitComparison(){
+    if(!state.selectedComparison){
+        alert('選択肢を選んでください');
+        return;
+    }
+    
+    let correct=false;
+    if(state.selectedComparison==='left'&&state.prob.left>state.prob.right)correct=true;
+    if(state.selectedComparison==='right'&&state.prob.left<state.prob.right)correct=true;
+    if(state.selectedComparison==='equal'&&state.prob.left===state.prob.right)correct=true;
+    
+    if(correct){
+        handleCorrect();
+    }else{
+        const correctAnswer=state.prob.left>state.prob.right?'左がわ':
+                          state.prob.left<state.prob.right?'右がわ':'同じ';
+        handleWrong(correctAnswer);
+    }
+}
+
 function submitFraction(){
-    const num=parseInt($("n").value)||0;
-    const den=parseInt($("d").value)||1;
-    if(den===0){
-        showError("分母は0にできません");
+    const n=parseInt($("n").value);
+    const d=parseInt($("d").value);
+    if(isNaN(n)||isNaN(d)||d<=0){
+        alert('正しい数値を入力してください');
         return;
     }
-    if(num===0&&den===1){
-        showError("分子を入力してください");
-        return;
-    }
-    checkAnswer(num,den);
+    checkFractionAnswer(n,d);
 }
 
 function submitMixed(){
     const w=parseInt($("mw").value)||0;
-    const num=parseInt($("mn").value)||0;
-    const den=parseInt($("md").value)||1;
-    if(num===0&&w===0){
-        showError("答えを入力してください");
+    const n=parseInt($("mn").value)||0;
+    const d=parseInt($("md").value);
+    if(isNaN(d)||d<=0){
+        alert('正しい数値を入力してください');
         return;
     }
-    if(den===0){
-        showError("分母は0にできません");
-        return;
-    }
-    if(num>=den&&den>0&&num>0){
-        showError("帯分数の分子は分母より小さくしてください");
-        return;
-    }
-    checkAnswer(w*den+num,den);
+    const improperN=w*d+n;
+    checkFractionAnswer(improperN,d);
 }
 
 function submitNormal(){
-    const ans=$("norm").value.trim();
-    if(!ans){
-        showError("答えを入力してください");
-        return;
-    }
-    const userDec=parseFloat(ans);
-    const correctDec=state.prob.n/state.prob.d;
-    const isCorrect=!isNaN(userDec)&&Math.abs(userDec-correctDec)<0.0001;
-    handleAnswer(isCorrect,formatAnswer(state.prob.n,state.prob.d,state.unit));
-}
-
-function submitComparison(){
-    if(!state.selectedComparison){
-        showError("選択肢を選んでください");
-        return;
-    }
-    handleAnswer(state.selectedComparison===state.prob.a,"比較問題");
-}
-
-function checkAnswer(un,ud){
-    const[cn,cd]=simplify(state.prob.n,state.prob.d);
-    const[sn,sd]=simplify(un,ud);
-    const userGcd=gcd(Math.abs(un),Math.abs(ud));
-    const needsSimplification=userGcd>1;
-    const isCorrect=sn===cn&&sd===cd&&!needsSimplification;
-    const correctAns=formatAnswer(cn,cd,state.unit);
-    
-    if(needsSimplification){
-        const[rn,rd]=simplify(un,ud);
-        $("almostMsg").style.display="block";
-        $("almostText").textContent=`${un}/${ud} = ${rn}/${rd}`;
-        handleAnswer(false,correctAns);
+    const input=$("norm").value.trim();
+    if(!input){
+        alert('答えを入力してください');
         return;
     }
     
-    handleAnswer(isCorrect,correctAns);
-}
-
-function handleAnswer(isCorrect,correctAns){
-    if(isCorrect){
-        state.score++;
-        const points=calculateCorrectPoints(state.level,state.mode);
-        addPoints(points);
-        
-        if(state.mode==='practice')state.lvCount++;
-        else if(state.mode==='select')state.selectQCount++;
-        else if(state.mode==='hidden')state.hiddenQ++;
-        else{
-            state.qNum++;
-            state.totalQ++;
-        }
-        
-        animate("correct");
-        setTimeout(nextQ,2000);
-    }else{
-        $("wrong").style.display="block";
-        if(state.prob.type!=='comparison'){
-            $("correctAnswer").style.display="block";
-            $("correctText").textContent=correctAns;
-        }
-        
-        if(state.mode==='practice'){
-            state.lvCount=0;
-            $("practiceMsg").style.display="block";
-        }else if(state.mode==='select'){
-            $("selectMsg").style.display="block";
-            $("backToSelectBtn").style.display="inline-block";
-        }else{
-            if(state.mode==='hidden')disableHiddenStage();
-            showGameOver();
+    let userAnswer;
+    if(input.includes('/')){
+        const parts=input.split('/');
+        if(parts.length!==2){
+            alert('分数は「分子/分母」の形で入力してください');
             return;
         }
-        
-        animate("wrong");
+        const n=parseInt(parts[0]);
+        const d=parseInt(parts[1]);
+        if(isNaN(n)||isNaN(d)||d<=0){
+            alert('正しい数値を入力してください');
+            return;
+        }
+        checkFractionAnswer(n,d);
+        return;
+    }else{
+        userAnswer=parseFloat(input);
+        if(isNaN(userAnswer)){
+            alert('正しい数値を入力してください');
+            return;
+        }
+    }
+    
+    const[correctN,correctD]=simplify(state.prob.n,state.prob.d);
+    const correctDecimal=correctN/correctD;
+    
+    if(Math.abs(userAnswer-correctDecimal)<0.001){
+        handleCorrect();
+    }else{
+        handleWrong(formatAnswer(state.prob.n,state.prob.d,state.unit));
     }
 }
 
-function showError(msg){
-    $("wrongMsg").textContent=msg;
-    $("wrong").style.display="block";
-    $("correctAnswer").style.display="none";
-    $("practiceMsg").style.display="none";
-    $("selectMsg").style.display="none";
+function checkFractionAnswer(userN,userD){
+    const[correctN,correctD]=simplify(state.prob.n,state.prob.d);
+    const[inputN,inputD]=simplify(userN,userD);
+    
+    if(inputN===correctN&&inputD===correctD){
+        handleCorrect();
+    }else if(userN*correctD===correctN*userD){
+        $("almostMsg").style.display="block";
+        $("almostText").textContent=`${userN}/${userD} は約分すると ${correctN}/${correctD} になります`;
+        $("correctAnswer").style.display="block";
+        $("correctText").textContent=formatAnswer(state.prob.n,state.prob.d,state.unit);
+        $("wrong").style.display="block";
+    }else{
+        handleWrong(formatAnswer(state.prob.n,state.prob.d,state.unit));
+    }
+}
+
+async function handleCorrect(){
+    state.score++;
+    $("score").textContent=state.score;
+    
+    const points=calculateCorrectPoints(state.level,state.mode);
+    await addPoints(points);
+    
+    $("monster").classList.add("correct");
+    setTimeout(()=>$("monster").classList.remove("correct"),1500);
+    
+    if(state.mode==='practice'){
+        state.lvCount++;
+        if(state.lvCount>=5){
+            state.completed.add(state.level);
+            const levelPoints=calculateLevelPoints(state.level,state.mode);
+            await addPoints(levelPoints);
+            
+            $("monster").classList.add("level-up");
+            setTimeout(()=>$("monster").classList.remove("level-up"),3000);
+            
+            if(state.level<9){
+                state.level++;
+                state.lvCount=0;
+            }else{
+                // 練習モード全レベル完了
+                setTimeout(()=>{
+                    alert('練習モード全レベル完了！おめでとうございます！');
+                    backToStart();
+                },2000);
+                return;
+            }
+        }
+    }else if(state.mode==='summary'){
+        state.totalQ++;
+        if(state.totalQ>=45){
+            // ゲームクリア
+            stopTimer();
+            const clearTime=getElapsedTime();
+            enableHiddenStage();
+            setTimeout(()=>showClear(clearTime),1000);
+            return;
+        }else if(state.totalQ%5===0){
+            state.level++;
+        }
+    }else if(state.mode==='hidden'){
+        state.hiddenQ++;
+        if(state.hiddenQ>=10){
+            // 隠しステージクリア
+            stopTimer();
+            setTimeout(()=>showHiddenClear(),1000);
+            return;
+        }
+    }else if(state.mode==='select'){
+        state.selectQCount++;
+    }
+    
+    updateLevelIndicator();
+    updateProgressBar();
+    setTimeout(newProblem,1500);
+}
+
+function handleWrong(correctAnswer){
     $("almostMsg").style.display="none";
-    $("backToSelectBtn").style.display="none";
+    $("correctAnswer").style.display="block";
+    $("correctText").textContent=correctAnswer;
+    
+    if(state.mode==='practice'){
+        $("practiceMsg").style.display="block";
+        $("selectMsg").style.display="none";
+        $("backToSelectBtn").style.display="none";
+        state.lvCount=0;
+    }else if(state.mode==='summary'||state.mode==='hidden'){
+        stopTimer();
+        const finalTime=getElapsedTime();
+        setTimeout(()=>showGameOver(finalTime),2000);
+        return;
+    }else{
+        $("practiceMsg").style.display="none";
+        $("selectMsg").style.display="block";
+        $("backToSelectBtn").style.display="inline-block";
+    }
+    
+    $("monster").classList.add("wrong");
+    setTimeout(()=>$("monster").classList.remove("wrong"),1000);
+    $("wrong").style.display="block";
+    updateProgressBar();
 }
 
 function retry(){
     $("wrong").style.display="none";
-    $("almostMsg").style.display="none";
-    clearInputs();
-    if(state.prob?.type==='comparison'){
-        state.selectedComparison=null;
-        document.querySelectorAll('.comparison-btn').forEach(btn=>btn.classList.remove('selected'));
-    }
-    setFocus();
+    newProblem();
 }
 
 function next(){
-    nextQ();
+    $("wrong").style.display="none";
+    if(state.mode==='select'&&state.level<9){
+        state.level++;
+        updateLevelIndicator();
+    }
+    newProblem();
 }
 
-function showGameOver(){
-    stopTimer();
-    const progressPoints=state.level*20+state.score*5;
-    addPoints(progressPoints);
-    $("gameoverPoints").style.display="block";
-    $("gameoverPointsValue").textContent=progressPoints;
-    displayGlobalRanking('#globalRankingGameover','#myGlobalRankGameover');
+async function showGameOver(finalTime){
     $("game").style.display="none";
     $("gameover").style.display="block";
-    $("finalLv").textContent=state.mode==='hidden'?"隠し":state.level;
+    $("finalLv").textContent=state.level;
     $("finalScore1").textContent=state.score;
     
     if(state.mode==='summary'||state.mode==='hidden'){
-        const elapsedTime=getElapsedTime();
         $("finalTime").style.display="block";
-        $("finalTimeValue").textContent=formatTime(elapsedTime);
+        $("finalTimeValue").textContent=formatTime(finalTime);
+        
+        // ゲームオーバー時のポイント（到達レベルに応じて）
+        const gameoverPoints=state.level*20;
+        $("gameoverPoints").style.display="block";
+        $("gameoverPointsValue").textContent=gameoverPoints;
+        await addPoints(gameoverPoints);
+        
+        // グローバルランキング表示
+        displayGlobalRanking('#globalRankingGameover','#myGlobalRankGameover');
     }
 }
 
-function showClear(){
-    stopTimer();
-    createFireworks();
+async function showClear(clearTime){
     $("game").style.display="none";
     $("clear").style.display="block";
     $("finalScore2").textContent=state.score;
+    $("clearTimeValue").textContent=formatTime(clearTime);
     
-    if(state.mode==='summary'){
-        enableHiddenStage();
-        $("hiddenStageUnlock").style.display="block";
-        const elapsedTime=getElapsedTime();
-        $("clearTimeValue").textContent=formatTime(elapsedTime);
-        displayRanking(elapsedTime);
-    }
-    
+    createFireworks();
+    displayRanking(clearTime);
     displayGlobalRanking('#globalRankingClear','#myGlobalRankClear');
+    
+    $("hiddenStageUnlock").style.display="block";
 }
 
-function showHiddenClear(){
-    stopTimer();
-    createMasterFireworks();
-    disableHiddenStage();
-    const hiddenPoints=3000;
-    addPoints(hiddenPoints);
-    $("hiddenPointsEarned").style.display="block";
-    $("hiddenEarnedPoints").textContent=hiddenPoints;
-    displayGlobalRanking('#globalRankingHidden','#myGlobalRankHidden');
-    unlockTitle('fractionMaster');
+async function showHiddenClear(){
     $("game").style.display="none";
     $("hiddenClear").style.display="block";
     $("hiddenFinalScore").textContent=state.score;
+    
+    createMasterFireworks();
+    unlockTitle('fractionMaster');
+    
+    // 隠しステージクリアの大量ポイント
+    const hiddenPoints=3000;
+    $("hiddenPointsEarned").style.display="block";
+    $("hiddenEarnedPoints").textContent=hiddenPoints;
+    await addPoints(hiddenPoints);
+    
+    displayGlobalRanking('#globalRankingHidden','#myGlobalRankHidden');
 }
 
-document.addEventListener('keydown',e=>{
-    if(e.key==='Enter'&&e.target.tagName==='INPUT'){
-        e.preventDefault();
-        if(e.target.id==='n'||e.target.id==='d')submitFraction();
-        else if(['mw','mn','md'].includes(e.target.id))submitMixed();
-        else if(e.target.id==='norm')submitNormal();
+function restart(){
+    state.sessionPoints=0;
+    backToStart();
+}
+
+// 隠しステージ解放チェック
+try{
+    if(localStorage.getItem('summaryCleared')==='true'){
+        enableHiddenStage();
     }
-    
-    if(state.prob?.type==='comparison'){
-        if(e.key==='1'){
-            const btn=document.querySelector('.comparison-btn[onclick*="left"]');
-            if(btn)selectComparison(btn,'left');
-        }else if(e.key==='2'){
-            const btn=document.querySelector('.comparison-btn[onclick*="right"]');
-            if(btn)selectComparison(btn,'right');
-        }else if(e.key==='3'){
-            const btn=document.querySelector('.comparison-btn[onclick*="equal"]');
-            if(btn)selectComparison(btn,'equal');
-        }else if(e.key==='Enter'&&state.selectedComparison){
+}catch(e){}
+
+// キーボードイベント
+document.addEventListener('keydown',function(e){
+    if(e.key==='Enter'&&$("game").style.display==="block"){
+        if($("comparisonInput").style.display==="block"){
             submitComparison();
+        }else if($("n").value&&$("d").value){
+            submitFraction();
+        }else if($("norm").value){
+            submitNormal();
         }
     }
 });
 </script>
 </body>
 </html>
-
