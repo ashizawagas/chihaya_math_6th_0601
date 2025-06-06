@@ -102,10 +102,14 @@ input:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,243
 .error-msg{background:#ffebee;color:#d32f2f;padding:10px;border-radius:8px;margin:10px 0;border:2px solid #f44336}
 .almost-msg{background:#fff3e0;color:#f57c00;padding:10px;border-radius:8px;margin:10px 0;border:2px solid #ff9800}
 .level-select{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;max-width:600px;margin:20px auto}
-.level-btn{padding:15px;background:#e3f2fd;border:2px solid #2196f3;border-radius:10px;cursor:pointer;text-align:center;font-size:14px;transition:all 0.3s}
+.level-btn{padding:15px;background:#e3f2fd;border:2px solid #2196f3;border-radius:10px;cursor:pointer;text-align:center;font-size:14px;transition:all 0.3s;position:relative}
 .level-btn:hover{background:#2196f3;color:white;transform:scale(1.05)}
 .level-btn h4{margin:5px 0;font-size:16px}
 .level-btn p{margin:5px 0;font-size:12px;opacity:0.8}
+.level-btn.cleared{background:linear-gradient(45deg,#ffd700,#ffed4e);border:3px solid #ff6b6b;animation:clearedGlow 2s infinite}
+.level-btn.cleared::after{content:'🏆✨';position:absolute;top:-10px;right:-10px;font-size:20px;animation:bounce 1s infinite}
+@keyframes clearedGlow{0%,100%{box-shadow:0 0 15px rgba(255,215,0,0.5)}50%{box-shadow:0 0 30px rgba(255,215,0,0.8)}}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
 .correct-celebration{position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:1000}
 .firework{position:absolute;width:4px;height:4px;background:radial-gradient(circle,#ff0,#f00);border-radius:50%;animation:firework 2s ease-out forwards}
 @keyframes firework{0%{transform:scale(1);opacity:1}100%{transform:scale(20);opacity:0}}
@@ -136,6 +140,7 @@ input:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,243
 .global-ranking h3{color:#f57c00;margin-bottom:15px}
 .global-ranking-item{display:flex;justify-content:space-between;align-items:center;padding:10px 15px;margin:5px 0;border-radius:5px;background:#fff8e1}
 .global-ranking-item.my-rank{background:#e8f5e8;border:2px solid #4caf50;font-weight:bold}
+.level-clear-screen{background:linear-gradient(45deg,#ff9a9e,#fecfef);animation:rainbow 3s infinite;padding:40px;border-radius:20px;margin:20px}
 </style>
 </head>
 <body>
@@ -146,7 +151,7 @@ input:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,243
 <div id="playerIdDisplay" class="player-id" style="display:none">👤 プレイヤーID: <span id="playerId"></span></div>
 <div id="pointsDisplay" class="points-display" style="display:none">💰 総ポイント: <span id="totalPoints">0</span>P</div>
 <div class="info">
-<div class="mode-info select"><h3>🎮 選べるモード</h3><p>• 好きなレベルを選んで練習<br>• 何度でも挑戦可能<br>• 正解でポイント獲得（少なめ）</p></div>
+<div class="mode-info select"><h3>🎮 選べるモード</h3><p>• 好きなレベルを選んで練習<br>• 10問連続正解でレベルクリア<br>• 正解でポイント獲得（少なめ）</p></div>
 <div class="mode-info practice"><h3>📚 練習モード</h3><p>• 各レベルで5問連続正解で次のレベルへ<br>• 間違えたらそのレベルのカウントが0に戻る<br>• レベルアップでボーナスポイント（中程度）</p></div>
 <div class="mode-info summary"><h3>🎯 まとめモード</h3><p>• 全9レベル×各5問＝計45問に挑戦<br>• 一問でも間違えるとゲームオーバー<br>• クリア時間に応じて大量ポイント獲得<br>• <strong>クリアで隠しステージ解放！</strong></p></div>
 <div id="hiddenModeInfo" class="mode-info hidden" style="display:none"><h3>👑 隠しステージ</h3><p>• 超高難度の分数問題に挑戦<br>• 全10問クリアで「分数マスター」の称号獲得<br>• 派手なアニメーションで祝福！</p></div>
@@ -245,7 +250,7 @@ input:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,243
 <div id="wrongMsg" class="error-msg">まちがいです。</div>
 <div id="correctAnswer" class="correct-answer" style="display:none"><strong>正解：</strong><span id="correctText"></span></div>
 <div id="practiceMsg" style="display:none"><p>このレベルのカウントが0に戻ります。頑張って！</p></div>
-<div id="selectMsg" style="display:none"><p>もう一度挑戦しましょう！</p></div>
+<div id="selectMsg" style="display:none"><p>連続正解カウントが0に戻ります。もう一度挑戦しましょう！</p></div>
 <button onclick="retry()">もう一度</button>
 <button onclick="next()">つぎへ</button>
 <button id="backToSelectBtn" onclick="backToLevelSelect()" style="display:none">レベル選択に戻る</button>
@@ -255,6 +260,7 @@ input:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,243
 <span>スコア: <span id="score">0</span></span>
 <span id="totalQ" style="display:none"> / 45問中</span>
 <span id="hiddenQ" style="display:none"> / 10問中</span>
+<span id="selectQ" style="display:none"> / 10問中</span>
 </div>
 </div>
 
@@ -271,10 +277,6 @@ input:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,243
 <div id="globalRankingGameover" class="global-ranking">
 <h3>🌍 全体ランキング</h3>
 <div id="globalRankingListGameover"></div>
-<div style="margin-top:15px;padding-top:15px;border-top:2px solid #ddd;">
-<h4>あなたの順位</h4>
-<div id="myGlobalRankGameover"></div>
-</div>
 </div>
 <button onclick="restart()">もう一度</button>
 </div>
@@ -291,16 +293,23 @@ input:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,243
 <div id="globalRankingClear" class="global-ranking" style="display:none">
 <h3>🌍 全体ランキング</h3>
 <div id="globalRankingListClear"></div>
-<div style="margin-top:15px;padding-top:15px;border-top:2px solid #ddd;">
-<h4>あなたの順位</h4>
-<div id="myGlobalRankClear"></div>
-</div>
 </div>
 <div id="hiddenStageUnlock" class="hidden-stage-unlock" style="display:none;padding:20px;margin:20px;border-radius:15px;">
 <h3>🌟 隠しステージが解放されました！ 🌟</h3>
 <p>今すぐ隠しステージに挑戦できます！</p>
 </div>
 <button onclick="restart()">もう一度</button>
+</div>
+
+<div id="levelClear" style="display:none" class="level-clear-screen">
+<h1>🎉 レベルクリア！ 🎉</h1>
+<div class="monster" style="font-size:120px">🏆</div>
+<h2>おめでとう！レベル<span id="clearedLevel"></span>をクリアしました！</h2>
+<div class="info">
+<p>10問連続正解達成！</p>
+<div id="levelClearPoints" class="points-earned">🎉 獲得ポイント: <span id="levelClearPointsValue">0</span>P</div>
+</div>
+<button onclick="backToLevelSelect()">レベル選択に戻る</button>
 </div>
 
 <div id="hiddenClear" style="display:none">
@@ -317,10 +326,6 @@ input:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,243
 <div id="globalRankingHidden" class="global-ranking" style="display:none">
 <h3>🌍 全体ランキング</h3>
 <div id="globalRankingListHidden"></div>
-<div style="margin-top:15px;padding-top:15px;border-top:2px solid #ddd;">
-<h4>あなたの順位</h4>
-<div id="myGlobalRankHidden"></div>
-</div>
 </div>
 <button onclick="restart()" style="padding:15px 30px;font-size:20px;background:#4CAF50;color:white;border:none;border-radius:10px;cursor:pointer;">トップに戻る</button>
 </div>
@@ -440,7 +445,7 @@ async function displayFirebaseRanking() {
     } else {
         const medals = ["🥇", "🥈", "🥉"];
         rankings.forEach((ranking, index) => {
-            const medal = index < 3 ? medals[index] : `${ranking.rank}位`;
+            const medal = index < 3 ? medals[index] : `${index + 1}位`;
             const isMyRank = ranking.playerId === playerId ? 'background: #e8f5e8; border: 2px solid #4caf50; font-weight: bold;' : 'background: #fff8e1;';
             
             rankingHTML += `
@@ -453,19 +458,21 @@ async function displayFirebaseRanking() {
             `;
         });
         
-        // 自分の順位を表示
-        rankingHTML += `
-            <div style="margin-top: 20px; padding-top: 15px; border-top: 2px solid #ddd;">
-                <h4 style="text-align: center; color: #333;">あなたの順位</h4>
-                <div style="display: flex; justify-content: space-between; align-items: center; 
-                           padding: 10px 15px; margin: 5px 0; border-radius: 5px; 
-                           background: #e8f5e8; border: 2px solid #4caf50; font-weight: bold;">
-                    <span><strong>${myRank || '圏外'}位</strong></span>
-                    <span><strong>ID: ${playerId}</strong></span>
-                    <span><strong>${totalPoints}P</strong></span>
+        // 自分の順位を表示（ベスト10に入っている場合のみ）
+        if (myRank <= 10) {
+            rankingHTML += `
+                <div style="margin-top: 20px; padding-top: 15px; border-top: 2px solid #ddd;">
+                    <h4 style="text-align: center; color: #333;">あなたの順位</h4>
+                    <div style="display: flex; justify-content: space-between; align-items: center; 
+                               padding: 10px 15px; margin: 5px 0; border-radius: 5px; 
+                               background: #e8f5e8; border: 2px solid #4caf50; font-weight: bold;">
+                        <span><strong>${myRank || '圏外'}位</strong></span>
+                        <span><strong>ID: ${playerId}</strong></span>
+                        <span><strong>${totalPoints}P</strong></span>
+                    </div>
                 </div>
-            </div>
-        `;
+            `;
+        }
     }
     
     rankingHTML += `
@@ -483,7 +490,7 @@ async function displayFirebaseRanking() {
 }
 
 const $=id=>document.getElementById(id)||{style:{},textContent:'',innerHTML:'',value:'',classList:{add:()=>{},remove:()=>{}},appendChild:()=>{},remove:()=>{},focus:()=>{}};
-let state={score:0,level:1,prob:null,unit:"",mode:"",lvCount:0,totalQ:0,qNum:0,completed:new Set(),selectedComparison:null,selectQCount:0,startTime:null,timerInterval:null,hiddenQ:0,sessionPoints:0};
+let state={score:0,level:1,prob:null,unit:"",mode:"",lvCount:0,totalQ:0,qNum:0,completed:new Set(),selectedComparison:null,selectQCount:0,startTime:null,timerInterval:null,hiddenQ:0,sessionPoints:0,selectCorrectCount:0,clearedLevels:new Set()};
 const monsters=["📊","🔢","🔲","🔄","⭐","⚖️","💡","🏃","👑"];
 const lvNames=["分数×整数","分数÷整数","分数×分数","帯分数×帯分数","分数×分数×分数","大小比較","逆数","時間の分数","分数の文章題"];
 let totalPoints=0,hiddenStageAvailable=false,playerId='';
@@ -509,6 +516,35 @@ function initializePlayerId(){
         }
     }catch(e){
         playerId=generatePlayerId();
+    }
+}
+
+// クリアしたレベルの管理
+function loadClearedLevels(){
+    try{
+        const saved=localStorage.getItem('clearedLevels');
+        if(saved){
+            state.clearedLevels=new Set(JSON.parse(saved));
+        }
+    }catch(e){}
+}
+
+function saveClearedLevels(){
+    try{
+        localStorage.setItem('clearedLevels',JSON.stringify([...state.clearedLevels]));
+    }catch(e){}
+}
+
+function updateLevelSelectDisplay(){
+    for(let i=1;i<=9;i++){
+        const levelBtn=document.querySelector(`.level-btn:nth-child(${i})`);
+        if(levelBtn){
+            if(state.clearedLevels.has(i)){
+                levelBtn.classList.add('cleared');
+            }else{
+                levelBtn.classList.remove('cleared');
+            }
+        }
     }
 }
 
@@ -548,30 +584,33 @@ function displayGlobalRanking(containerId,myRankId){
     const rankingList=$(containerId.replace('#','')+'List');
     rankingList.innerHTML="";
     
-    // トップ3を表示
+    // ベスト10を表示
     const medals=["🥇","🥈","🥉"];
-    for(let i=0;i<Math.min(3,globalRanking.length);i++){
+    for(let i=0;i<Math.min(10,globalRanking.length);i++){
         const rankDiv=document.createElement("div");
         rankDiv.className="global-ranking-item";
         if(globalRanking[i].id===playerId)rankDiv.classList.add("my-rank");
         
+        const medal = i < 3 ? medals[i] : `${i+1}位`;
         rankDiv.innerHTML=`
-            <span><span class="rank-medal">${medals[i]}</span>${i+1}位</span>
+            <span><span class="rank-medal">${medal}</span></span>
             <span>ID: ${globalRanking[i].id}</span>
             <span>${globalRanking[i].points}P</span>
         `;
         rankingList.appendChild(rankDiv);
     }
     
-    // 自分の順位を表示
-    const myRankDiv=$(myRankId.replace('#',''));
-    myRankDiv.innerHTML=`
-        <div class="global-ranking-item my-rank">
-            <span><strong>${myRank}位</strong></span>
-            <span><strong>ID: ${playerId}</strong></span>
-            <span><strong>${totalPoints}P</strong></span>
-        </div>
-    `;
+    // 自分の順位を表示（ベスト10に入っている場合のみ）
+    if(myRankId && myRank <= 10){
+        const myRankDiv=$(myRankId.replace('#',''));
+        myRankDiv.innerHTML=`
+            <div class="global-ranking-item my-rank">
+                <span><strong>${myRank}位</strong></span>
+                <span><strong>ID: ${playerId}</strong></span>
+                <span><strong>${totalPoints}P</strong></span>
+            </div>
+        `;
+    }
 }
 
 // 隠しステージの厳格な制御
@@ -583,6 +622,7 @@ const titles={fractionMaster:{name:"分数マスター",description:"隠しス�
 
 window.addEventListener('load',()=>{
     initializePlayerId();
+    loadClearedLevels();
     $("playerIdDisplay").style.display="block";
     $("playerId").textContent=playerId;
     if(totalPoints>0){
@@ -614,7 +654,7 @@ function calculateClearPoints(clearTime){
 function calculateLevelPoints(level,mode){
     const basePoints = level*50;
     if(mode==='practice')return Math.floor(basePoints*0.3); // まとめモードの30%
-    else if(mode==='select')return Math.floor(basePoints*0.1); // まとめモードの10%
+    else if(mode==='select')return Math.floor(basePoints*0.5); // まとめモードの50%
     else return basePoints; // まとめモード（変更なし）
 }
 
@@ -763,6 +803,7 @@ function generateProblem(lv){
         }
     }
 }
+
 
 function newProblem(){
     state.prob=generateProblem(state.level);
@@ -1125,6 +1166,7 @@ function handleWrong(correctAnswer){
     }else if(state.mode==='summary'||state.mode==='hidden'){
         stopTimer();
         const finalTime=getElapsedTime();
+        // まとめモードと隠しステージで間違えた場合はポイントを付与しない
         setTimeout(()=>showGameOver(finalTime),2000);
         return;
     }else{
@@ -1163,12 +1205,16 @@ async function showGameOver(finalTime){
         $("finalTime").style.display="block";
         $("finalTimeValue").textContent=formatTime(finalTime);
         
-        const gameoverPoints=state.level*20;
-        $("gameoverPoints").style.display="block";
-        $("gameoverPointsValue").textContent=gameoverPoints;
-        await addPoints(gameoverPoints);
+        // まとめモードと隠しステージで間違えた場合は、ポイントを付与しない
+        // （1問目で間違えた場合も含む）
+        if(state.score > 0){
+            const gameoverPoints=state.level*20;
+            $("gameoverPoints").style.display="block";
+            $("gameoverPointsValue").textContent=gameoverPoints;
+            await addPoints(gameoverPoints);
+        }
         
-        // ゲームオーバー時はグローバルランキングのみ表示
+        // ゲームオーバー時のランキング表示（ベスト10に入っている場合のみ自分の順位を表示）
         $("globalRankingGameover").style.display="block";
         try {
             const rankings = await fetchTopRanking(10);
@@ -1182,8 +1228,7 @@ async function showGameOver(finalTime){
             } else {
                 const medals = ["🥇", "🥈", "🥉"];
                 rankings.forEach((ranking, index) => {
-                    const medal = index < 3 ? medals[index] : `${ranking.rank}位`;
-                    const isMyRank = ranking.playerId === playerId ? 'background: #e8f5e8; border: 2px solid #4caf50; font-weight: bold;' : 'background: #fff8e1;';
+                    const medal = index < 3 ? medals[index] : `${index + 1}位`;
                     
                     const rankDiv = document.createElement("div");
                     rankDiv.className = "global-ranking-item";
@@ -1197,14 +1242,17 @@ async function showGameOver(finalTime){
                 });
             }
             
-            const myRankDiv = $("myGlobalRankGameover");
-            myRankDiv.innerHTML = `
-                <div class="global-ranking-item my-rank">
-                    <span><strong>${myRank || '圏外'}位</strong></span>
-                    <span><strong>ID: ${playerId}</strong></span>
-                    <span><strong>${totalPoints}P</strong></span>
-                </div>
-            `;
+            // 自分の順位を表示（ベスト10に入っている場合のみ）
+            if (myRank <= 10) {
+                const myRankDiv = $("myGlobalRankGameover");
+                myRankDiv.innerHTML = `
+                    <div class="global-ranking-item my-rank">
+                        <span><strong>${myRank || '圏外'}位</strong></span>
+                        <span><strong>ID: ${playerId}</strong></span>
+                        <span><strong>${totalPoints}P</strong></span>
+                    </div>
+                `;
+            }
         } catch (error) {
             console.error('ランキング表示エラー:', error);
         }
@@ -1217,8 +1265,7 @@ async function showClear(clearTime){
     $("finalScore2").textContent=state.score;
     $("clearTimeValue").textContent=formatTime(clearTime);
     
-    // まとめモードクリア時のボーナスを10倍に変更
-    const clearPoints=calculateClearPoints(clearTime) * 10;
+    const clearPoints=calculateClearPoints(clearTime);
     $("pointsEarned").style.display="block";
     $("earnedPoints").textContent=clearPoints;
     await addPoints(clearPoints);
@@ -1226,7 +1273,49 @@ async function showClear(clearTime){
     try{localStorage.setItem('summaryCleared','true')}catch(e){}
     
     createFireworks();
-    displayGlobalRanking('#globalRankingClear','#myGlobalRankClear');
+    
+    // クリア時のランキング表示（ベスト10に入っている場合のみ自分の順位を表示）
+    $("globalRankingClear").style.display="block";
+    try {
+        const rankings = await fetchTopRanking(10);
+        const myRank = await getPlayerRank(playerId, totalPoints);
+        
+        const rankingList = $("globalRankingListClear");
+        rankingList.innerHTML = "";
+        
+        if (rankings.length === 0) {
+            rankingList.innerHTML = '<p style="text-align: center;">ランキングデータがありません</p>';
+        } else {
+            const medals = ["🥇", "🥈", "🥉"];
+            rankings.forEach((ranking, index) => {
+                const medal = index < 3 ? medals[index] : `${index + 1}位`;
+                
+                const rankDiv = document.createElement("div");
+                rankDiv.className = "global-ranking-item";
+                if(ranking.playerId === playerId) rankDiv.classList.add("my-rank");
+                rankDiv.innerHTML = `
+                    <span><span class="rank-medal">${medal}</span></span>
+                    <span>ID: ${ranking.playerId}</span>
+                    <span>${ranking.totalPoints}P</span>
+                `;
+                rankingList.appendChild(rankDiv);
+            });
+        }
+        
+        // 自分の順位を表示（ベスト10に入っている場合のみ）
+        if (myRank <= 10) {
+            const myRankDiv = $("myGlobalRankClear");
+            myRankDiv.innerHTML = `
+                <div class="global-ranking-item my-rank">
+                    <span><strong>${myRank || '圏外'}位</strong></span>
+                    <span><strong>ID: ${playerId}</strong></span>
+                    <span><strong>${totalPoints}P</strong></span>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('ランキング表示エラー:', error);
+    }
     
     $("hiddenStageUnlock").style.display="block";
 }
@@ -1244,7 +1333,48 @@ async function showHiddenClear(){
     $("hiddenEarnedPoints").textContent=hiddenPoints;
     await addPoints(hiddenPoints);
     
-    displayGlobalRanking('#globalRankingHidden','#myGlobalRankHidden');
+    // 隠しステージクリア時のランキング表示（ベスト10に入っている場合のみ自分の順位を表示）
+    $("globalRankingHidden").style.display="block";
+    try {
+        const rankings = await fetchTopRanking(10);
+        const myRank = await getPlayerRank(playerId, totalPoints);
+        
+        const rankingList = $("globalRankingListHidden");
+        rankingList.innerHTML = "";
+        
+        if (rankings.length === 0) {
+            rankingList.innerHTML = '<p style="text-align: center;">ランキングデータがありません</p>';
+        } else {
+            const medals = ["🥇", "🥈", "🥉"];
+            rankings.forEach((ranking, index) => {
+                const medal = index < 3 ? medals[index] : `${index + 1}位`;
+                
+                const rankDiv = document.createElement("div");
+                rankDiv.className = "global-ranking-item";
+                if(ranking.playerId === playerId) rankDiv.classList.add("my-rank");
+                rankDiv.innerHTML = `
+                    <span><span class="rank-medal">${medal}</span></span>
+                    <span>ID: ${ranking.playerId}</span>
+                    <span>${ranking.totalPoints}P</span>
+                `;
+                rankingList.appendChild(rankDiv);
+            });
+        }
+        
+        // 自分の順位を表示（ベスト10に入っている場合のみ）
+        if (myRank <= 10) {
+            const myRankDiv = $("myGlobalRankHidden");
+            myRankDiv.innerHTML = `
+                <div class="global-ranking-item my-rank">
+                    <span><strong>${myRank || '圏外'}位</strong></span>
+                    <span><strong>ID: ${playerId}</strong></span>
+                    <span><strong>${totalPoints}P</strong></span>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('ランキング表示エラー:', error);
+    }
 }
 
 function restart(){
