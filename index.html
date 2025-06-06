@@ -288,14 +288,6 @@ input:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,243
 <p id="clearTime">クリア時間: <span id="clearTimeValue"></span></p>
 <div id="pointsEarned" class="points-earned" style="display:none">🎉 獲得ポイント: <span id="earnedPoints">0</span>P</div>
 </div>
-<div id="rankingDisplay" class="ranking" style="display:none">
-<h3>🏆 ランキング（トップ3）</h3>
-<div id="rankingList"></div>
-<div id="myRanking" style="margin-top:15px;padding-top:15px;border-top:2px solid #ddd;">
-<h4>あなたの記録</h4>
-<div id="myRankingItem"></div>
-</div>
-</div>
 <div id="globalRankingClear" class="global-ranking" style="display:none">
 <h3>🌍 全体ランキング</h3>
 <div id="globalRankingListClear"></div>
@@ -680,6 +672,45 @@ function getElapsedTime(){
     return state.startTime?Math.floor((Date.now()-state.startTime)/1000):0;
 }
 
+function generateHiddenProblem(){
+    const type=R(1,5);
+    switch(type){
+        case 1:{
+            const[n1,d1]=randFrac(12,15);
+            const[n2,d2]=randFrac(12,15);
+            const[n3,d3]=randFrac(12,15);
+            const[n4,d4]=randFrac(12,15);
+            return{q:`${frac(n1,d1)} × ${frac(n2,d2)} × ${frac(n3,d3)} × ${frac(n4,d4)} =`,n:n1*n2*n3*n4,d:d1*d2*d3*d4,type:'fraction',mixed:false};
+        }
+        case 2:{
+            const w1=R(2,4),d1=R(5,8),n1=R(1,d1-1);
+            const w2=R(2,4),d2=R(5,8),n2=R(1,d2-1);
+            const w3=R(1,3),d3=R(4,6),n3=R(1,d3-1);
+            const i1=w1*d1+n1,i2=w2*d2+n2,i3=w3*d3+n3;
+            return{q:`${mixedFrac(w1,n1,d1)} × ${mixedFrac(w2,n2,d2)} × ${mixedFrac(w3,n3,d3)} =`,n:i1*i2*i3,d:d1*d2*d3,type:'fraction',mixed:true};
+        }
+        case 3:{
+            const[n1,d1]=randFrac(15,20);
+            const[n2,d2]=randFrac(15,20);
+            const[n3,d3]=randFrac(15,20);
+            return{q:`${frac(n1,d1)} ÷ ${frac(n2,d2)} × ${frac(n3,d3)} =`,n:n1*d2*n3,d:d1*n2*d3,type:'fraction',mixed:false};
+        }
+        case 4:{
+            const total=R(100,200);
+            const[n1,d1]=randFrac(8,15);
+            const[n2,d2]=randFrac(8,15);
+            const remaining=total*(d1-n1)/d1;
+            return{q:`${total}個のお菓子があります。最初に全体の${frac(n1,d1)}を食べ、残りの${frac(n2,d2)}をさらに食べました。最後に残ったお菓子は何個ですか？`,n:remaining*(d2-n2),d:d2,u:"個",type:'fraction',mixed:false};
+        }
+        case 5:{
+            const[n1,d1]=randFrac(20,30);
+            const[n2,d2]=randFrac(20,30);
+            const[n3,d3]=randFrac(20,30);
+            return{q:`${frac(n1,d1)}、${frac(n2,d2)}、${frac(n3,d3)} の中で最も大きいものを分数で答えてください`,left:Math.max(n1*d2*d3,n2*d1*d3,n3*d1*d2),right:d1*d2*d3,type:'max_fraction'};
+        }
+    }
+}
+
 function generateProblem(lv){
     if(state.mode==='hidden')return generateHiddenProblem();
     switch(lv){
@@ -775,7 +806,13 @@ function newProblem(){
     }
     
     $("wrong").style.display="none";
-    $("n").focus();
+    
+    // カーソル位置を分母に設定[3][4][5][6]
+    setTimeout(() => {
+        if(state.prob.type!=='comparison'){
+            $("d").focus();
+        }
+    }, 100);
 }
 
 function selectMode(mode){
@@ -908,6 +945,45 @@ function updateModeDisplay(){
         case 'hidden':
             modeDisplay.innerHTML='<div class="mode-info hidden"><strong>👑 隠しステージ</strong><br>超高難度の分数問題に挑戦！</div>';
             break;
+    }
+}
+
+function generateHiddenProblem(){
+    const type=R(1,5);
+    switch(type){
+        case 1:{
+            const[n1,d1]=randFrac(12,15);
+            const[n2,d2]=randFrac(12,15);
+            const[n3,d3]=randFrac(12,15);
+            const[n4,d4]=randFrac(12,15);
+            return{q:`${frac(n1,d1)} × ${frac(n2,d2)} × ${frac(n3,d3)} × ${frac(n4,d4)} =`,n:n1*n2*n3*n4,d:d1*d2*d3*d4,type:'fraction',mixed:false};
+        }
+        case 2:{
+            const w1=R(2,4),d1=R(5,8),n1=R(1,d1-1);
+            const w2=R(2,4),d2=R(5,8),n2=R(1,d2-1);
+            const w3=R(1,3),d3=R(4,6),n3=R(1,d3-1);
+            const i1=w1*d1+n1,i2=w2*d2+n2,i3=w3*d3+n3;
+            return{q:`${mixedFrac(w1,n1,d1)} × ${mixedFrac(w2,n2,d2)} × ${mixedFrac(w3,n3,d3)} =`,n:i1*i2*i3,d:d1*d2*d3,type:'fraction',mixed:true};
+        }
+        case 3:{
+            const[n1,d1]=randFrac(15,20);
+            const[n2,d2]=randFrac(15,20);
+            const[n3,d3]=randFrac(15,20);
+            return{q:`${frac(n1,d1)} ÷ ${frac(n2,d2)} × ${frac(n3,d3)} =`,n:n1*d2*n3,d:d1*n2*d3,type:'fraction',mixed:false};
+        }
+        case 4:{
+            const total=R(100,200);
+            const[n1,d1]=randFrac(8,15);
+            const[n2,d2]=randFrac(8,15);
+            const remaining=total*(d1-n1)/d1;
+            return{q:`${total}個のお菓子があります。最初に全体の${frac(n1,d1)}を食べ、残りの${frac(n2,d2)}をさらに食べました。最後に残ったお菓子は何個ですか？`,n:remaining*(d2-n2),d:d2,u:"個",type:'fraction',mixed:false};
+        }
+        case 5:{
+            const[n1,d1]=randFrac(20,30);
+            const[n2,d2]=randFrac(20,30);
+            const[n3,d3]=randFrac(20,30);
+            return{q:`${frac(n1,d1)}、${frac(n2,d2)}、${frac(n3,d3)} の中で最も大きいものを分数で答えてください`,left:Math.max(n1*d2*d3,n2*d1*d3,n3*d1*d2),right:d1*d2*d3,type:'max_fraction'};
+        }
     }
 }
 
@@ -1145,8 +1221,14 @@ async function showClear(clearTime){
     $("finalScore2").textContent=state.score;
     $("clearTimeValue").textContent=formatTime(clearTime);
     
+    const clearPoints=calculateClearPoints(clearTime);
+    $("pointsEarned").style.display="block";
+    $("earnedPoints").textContent=clearPoints;
+    await addPoints(clearPoints);
+    
+    try{localStorage.setItem('summaryCleared','true')}catch(e){}
+    
     createFireworks();
-    displayRanking(clearTime);
     displayGlobalRanking('#globalRankingClear','#myGlobalRankClear');
     
     $("hiddenStageUnlock").style.display="block";
@@ -1174,12 +1256,76 @@ function restart(){
     backToStart();
 }
 
+function createFireworks(){
+    const celebration=$("celebration");
+    celebration.innerHTML="";
+    
+    for(let i=0;i<20;i++){
+        const firework=document.createElement("div");
+        firework.className="firework";
+        firework.style.left=Math.random()*100+"%";
+        firework.style.top=Math.random()*100+"%";
+        firework.style.animationDelay=Math.random()*2+"s";
+        celebration.appendChild(firework);
+        
+        setTimeout(()=>firework.remove(),3000);
+    }
+    
+    for(let i=0;i<50;i++){
+        const sparkle=document.createElement("div");
+        sparkle.className="sparkle";
+        sparkle.style.left=Math.random()*100+"%";
+        sparkle.style.top=Math.random()*100+"%";
+        sparkle.style.animationDelay=Math.random()*3+"s";
+        celebration.appendChild(sparkle);
+        
+        setTimeout(()=>sparkle.remove(),4000);
+    }
+}
+
+function createMasterFireworks(){
+    const celebration=$("celebration");
+    celebration.innerHTML="";
+    
+    for(let i=0;i<50;i++){
+        const firework=document.createElement("div");
+        firework.className="firework";
+        firework.style.left=Math.random()*100+"%";
+        firework.style.top=Math.random()*100+"%";
+        firework.style.animationDelay=Math.random()*3+"s";
+        firework.style.background=`hsl(${Math.random()*360},100%,50%)`;
+        celebration.appendChild(firework);
+        
+        setTimeout(()=>firework.remove(),5000);
+    }
+    
+    for(let i=0;i<100;i++){
+        const sparkle=document.createElement("div");
+        sparkle.className="sparkle";
+        sparkle.style.left=Math.random()*100+"%";
+        sparkle.style.top=Math.random()*100+"%";
+        sparkle.style.animationDelay=Math.random()*5+"s";
+        sparkle.style.background=`hsl(${Math.random()*360},100%,70%)`;
+        celebration.appendChild(sparkle);
+        
+        setTimeout(()=>sparkle.remove(),6000);
+    }
+}
+
+function unlockTitle(titleKey){
+    if(titles[titleKey]){
+        titles[titleKey].unlocked=true;
+        try{localStorage.setItem('titles',JSON.stringify(titles))}catch(e){}
+    }
+}
+
 // 隠しステージ解放チェック
 try{
     if(localStorage.getItem('summaryCleared')==='true'){
         enableHiddenStage();
     }
 }catch(e){}
+
 
 // キーボードイベント
 document.addEventListener('keydown',function(e){
