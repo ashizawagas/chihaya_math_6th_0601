@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>千早算数クエスト - 6年生分数の割り算版</title>
+<title>千早算数クエスト - 6年生分数版</title>
 
 <!-- Firebase SDK -->
 <script type="module">
@@ -54,8 +54,6 @@ button:hover{background:#45a049}
 @keyframes hiddenPulse{0%,100%{transform:scale(1);box-shadow:0 0 10px #ff6b6b}50%{transform:scale(1.05);box-shadow:0 0 20px #ff6b6b}}
 input{font-size:18px;padding:10px;border:2px solid #ddd;border-radius:5px;margin:10px}
 input:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,243,.3)}
-select{font-size:18px;padding:10px;border:2px solid #ddd;border-radius:5px;margin:10px}
-select:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,243,.3)}
 .status{margin:15px 0;font-size:18px}
 .progress{background:#e0e0e0;border-radius:10px;margin:15px 0;height:20px;overflow:hidden}
 .progress-bar{height:100%;transition:width .3s}
@@ -143,17 +141,10 @@ select:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,24
 .global-ranking-item{display:flex;justify-content:space-between;align-items:center;padding:10px 15px;margin:5px 0;border-radius:5px;background:#fff8e1}
 .global-ranking-item.my-rank{background:#e8f5e8;border:2px solid #4caf50;font-weight:bold}
 .level-clear-screen{background:linear-gradient(45deg,#ff9a9e,#fecfef);animation:rainbow 3s infinite;padding:40px;border-radius:20px;margin:20px}
-.formula-section{background:white;border:2px solid #2196f3;border-radius:15px;padding:15px;min-width:300px}
-.formula-section h3{margin:0 0 10px 0;color:#2196f3;font-size:16px}
-.formula-input{display:flex;flex-direction:column;align-items:center;gap:10px}
-.formula-builder{display:flex;align-items:center;gap:10px;margin:10px 0;flex-wrap:wrap;justify-content:center}
-.formula-builder input{width:60px;text-align:center}
-.formula-builder select{width:80px;text-align:center}
-.formula-preview{background:#f5f5f5;padding:10px;border-radius:5px;margin:10px 0;font-size:18px;min-height:30px}
 </style>
 </head>
 <body>
-<h1>🧮 千早算数クエスト - 6年生分数の割り算版</h1>
+<h1>🧮 千早算数クエスト - 6年生分数版</h1>
 
 <div id="start">
 <h2>モードを選択してください</h2>
@@ -162,8 +153,8 @@ select:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,24
 <div class="info">
 <div class="mode-info select"><h3>🎮 選べるモード</h3><p>• 好きなレベルを選んで練習<br>• 10問連続正解でレベルクリア<br>• 正解でポイント獲得（少なめ）</p></div>
 <div class="mode-info practice"><h3>📚 練習モード</h3><p>• 各レベルで5問連続正解で次のレベルへ<br>• 間違えたらそのレベルのカウントが0に戻る<br>• レベルアップでボーナスポイント（中程度）</p></div>
-<div class="mode-info summary"><h3>🎯 まとめモード</h3><p>• 全10レベル×各5問＝計50問に挑戦<br>• 一問でも間違えるとゲームオーバー<br>• クリア時間に応じて大量ポイント獲得<br>• <strong>クリアで隠しステージ解放！</strong></p></div>
-<div id="hiddenModeInfo" class="mode-info hidden" style="display:none"><h3>👑 隠しステージ</h3><p>• 超高難度の分数の割り算問題に挑戦<br>• 全10問クリアで「分数の割り算マスター」の称号獲得<br>• 派手なアニメーションで祝福！</p></div>
+<div class="mode-info summary"><h3>🎯 まとめモード</h3><p>• 全9レベル×各5問＝計45問に挑戦<br>• 一問でも間違えるとゲームオーバー<br>• クリア時間に応じて大量ポイント獲得<br>• <strong>クリアで隠しステージ解放！</strong></p></div>
+<div id="hiddenModeInfo" class="mode-info hidden" style="display:none"><h3>👑 隠しステージ</h3><p>• 超高難度の分数問題に挑戦<br>• 全10問クリアで「分数マスター」の称号獲得<br>• 派手なアニメーションで祝福！</p></div>
 </div>
 <button class="mode-btn select" onclick="showLevelSelect()">🎮 選べるモード</button>
 <button class="mode-btn practice" onclick="selectMode('practice')">📚 練習モード</button>
@@ -177,16 +168,15 @@ select:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,24
 <div id="levelSelect" style="display:none">
 <h2>🎮 レベルを選択してください</h2>
 <div class="level-select">
-<div class="level-btn" onclick="selectLevel(1)"><h4>➗ レベル1</h4><p>分数÷分数</p></div>
-<div class="level-btn" onclick="selectLevel(2)"><h4>🔢 レベル2</h4><p>分数÷分数×分数</p></div>
-<div class="level-btn" onclick="selectLevel(3)"><h4>🔲 レベル3</h4><p>整数÷分数、帯分数÷分数</p></div>
-<div class="level-btn" onclick="selectLevel(4)"><h4>⚖️ レベル4</h4><p>大小比較</p></div>
-<div class="level-btn" onclick="selectLevel(5)"><h4>📝 レベル5</h4><p>式を作る問題</p></div>
-<div class="level-btn" onclick="selectLevel(6)"><h4>🔀 レベル6</h4><p>小数・整数・分数の混合計算</p></div>
-<div class="level-btn" onclick="selectLevel(7)"><h4>⏰ レベル7</h4><p>分数で表す（時間・長さ）</p></div>
-<div class="level-btn" onclick="selectLevel(8)"><h4>📊 レベル8</h4><p>分数を使った文章題</p></div>
-<div class="level-btn" onclick="selectLevel(9)"><h4>✖️ レベル9</h4><p>分数の倍</p></div>
-<div class="level-btn" onclick="selectLevel(10)"><h4>👑 レベル10</h4><p>もとにする大きさを求める</p></div>
+<div class="level-btn" onclick="selectLevel(1)"><h4>📊 レベル1</h4><p>分数×整数</p></div>
+<div class="level-btn" onclick="selectLevel(2)"><h4>🔢 レベル2</h4><p>分数÷整数</p></div>
+<div class="level-btn" onclick="selectLevel(3)"><h4>🔲 レベル3</h4><p>分数×分数</p></div>
+<div class="level-btn" onclick="selectLevel(4)"><h4>🔄 レベル4</h4><p>帯分数×帯分数</p></div>
+<div class="level-btn" onclick="selectLevel(5)"><h4>⭐ レベル5</h4><p>分数×分数×分数</p></div>
+<div class="level-btn" onclick="selectLevel(6)"><h4>⚖️ レベル6</h4><p>大小比較</p></div>
+<div class="level-btn" onclick="selectLevel(7)"><h4>💡 レベル7</h4><p>逆数</p></div>
+<div class="level-btn" onclick="selectLevel(8)"><h4>🏃 レベル8</h4><p>時間の分数</p></div>
+<div class="level-btn" onclick="selectLevel(9)"><h4>👑 レベル9</h4><p>分数の文章題</p></div>
 </div>
 <button onclick="backToStart()">トップ画面にもどる</button>
 </div>
@@ -194,7 +184,7 @@ select:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,24
 <div id="game" style="display:none">
 <div class="info">
 <div id="modeDisplay"></div>
-<div>レベル<span id="lv">1</span>/10 - <span id="lvInfo"></span></div>
+<div>レベル<span id="lv">1</span>/9 - <span id="lvInfo"></span></div>
 <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
 <div id="levelProgress"></div>
 <div id="sessionPoints" class="session-points" style="display:none">今回のセッション: <span id="sessionPointsValue">0</span>P</div>
@@ -208,7 +198,7 @@ select:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,24
 </div>
 
 <div class="level-indicator" id="levelIndicator"></div>
-<div class="monster" id="monster">➗</div>
+<div class="monster" id="monster">📊</div>
 <div class="question" id="q"></div>
 
 <div id="answerSections" class="answer-sections">
@@ -247,31 +237,6 @@ select:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,24
 </div>
 </div>
 
-<div id="formulaSection" class="answer-sections" style="display:none">
-<div class="formula-section">
-<h3>式を作る（計算はしない）</h3>
-<div class="formula-input">
-<div class="formula-builder">
-<input type="number" id="f1n" placeholder="分子" min="0">
-<span>/</span>
-<input type="number" id="f1d" placeholder="分母" min="1">
-<select id="operator">
-<option value="">記号選択</option>
-<option value="÷">÷</option>
-<option value="×">×</option>
-<option value="+">+</option>
-<option value="-">-</option>
-</select>
-<input type="number" id="f2n" placeholder="分子" min="0">
-<span>/</span>
-<input type="number" id="f2d" placeholder="分母" min="1">
-</div>
-<div class="formula-preview" id="formulaPreview">式がここに表示されます</div>
-</div>
-<button class="submit-btn" onclick="submitFormula()">式で答える</button>
-</div>
-</div>
-
 <div id="comparisonInput" style="display:none" class="comparison-options">
 <button class="comparison-btn" onclick="selectComparison(this, 'left')">左がわ</button>
 <button class="comparison-btn" onclick="selectComparison(this, 'right')">右がわ</button>
@@ -293,7 +258,7 @@ select:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,24
 
 <div class="status">
 <span>スコア: <span id="score">0</span></span>
-<span id="totalQ" style="display:none"> / 50問中</span>
+<span id="totalQ" style="display:none"> / 45問中</span>
 <span id="hiddenQ" style="display:none"> / 10問中</span>
 <span id="selectQ" style="display:none"> / 10問中</span>
 </div>
@@ -304,7 +269,7 @@ select:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,24
 <div class="monster" style="font-size:120px">😵</div>
 <h2>残念！</h2>
 <div class="info">
-<p>到達レベル: <span id="finalLv"></span>/10</p>
+<p>到達レベル: <span id="finalLv"></span>/9</p>
 <p>正解数: <span id="finalScore1"></span>問</p>
 <p id="finalTime" style="display:none">経過時間: <span id="finalTimeValue"></span></p>
 <div id="gameoverPoints" class="points-earned" style="display:none">🎉 獲得ポイント: <span id="gameoverPointsValue">0</span>P</div>
@@ -351,8 +316,8 @@ select:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,24
 <div style="background:linear-gradient(45deg,#ff9a9e,#fecfef,#a8e6cf,#dcedc1);padding:40px;border-radius:20px;animation:rainbow 3s infinite;">
 <h1>🌟 隠しステージクリア！ 🌟</h1>
 <div class="monster master-celebration" style="font-size:150px;">👑</div>
-<h2>🏆 分数の割り算マスター誕生！ 🏆</h2>
-<p style="font-size:20px;color:#d32f2f;font-weight:bold;">あなたは真の分数の割り算の達人です！</p>
+<h2>🏆 分数マスター誕生！ 🏆</h2>
+<p style="font-size:20px;color:#d32f2f;font-weight:bold;">あなたは真の分数の達人です！</p>
 <div style="margin:20px 0;font-size:18px;">
 <p>隠しステージ全10問完全制覇</p>
 <p>最終スコア: <span id="hiddenFinalScore"></span>問正解</p>
@@ -374,11 +339,13 @@ async function savePlayerScore(playerId, points) {
     try {
         const playerRef = window.firestore.doc(window.db, 'players', playerId);
         
+        // 既存のスコアを確認
         const docSnap = await window.firestore.getDoc(playerRef);
         let shouldUpdate = true;
         
         if (docSnap.exists()) {
             const existingPoints = docSnap.data().totalPoints || 0;
+            // 既存のスコアより高い場合のみ更新
             shouldUpdate = points > existingPoints;
         }
         
@@ -401,6 +368,7 @@ async function savePlayerScore(playerId, points) {
     }
 }
 
+// トップランキングを取得
 async function fetchTopRanking(limitCount = 10) {
     try {
         const rankingQuery = window.firestore.query(
@@ -429,6 +397,7 @@ async function fetchTopRanking(limitCount = 10) {
     }
 }
 
+// プレイヤーの順位を取得
 async function getPlayerRank(playerId, playerPoints) {
     try {
         const allPlayersQuery = window.firestore.query(
@@ -453,10 +422,12 @@ async function getPlayerRank(playerId, playerPoints) {
     }
 }
 
+// Firebaseランキング表示
 async function displayFirebaseRanking() {
     const rankings = await fetchTopRanking(10);
     const myRank = await getPlayerRank(playerId, totalPoints);
     
+    // ランキング表示用のダイアログを作成
     const rankingDialog = document.createElement('div');
     rankingDialog.style.cssText = `
         position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
@@ -487,6 +458,7 @@ async function displayFirebaseRanking() {
             `;
         });
         
+        // 自分の順位を表示（ベスト10に入っている場合のみ）
         if (myRank <= 10) {
             rankingHTML += `
                 <div style="margin-top: 20px; padding-top: 15px; border-top: 2px solid #ddd;">
@@ -519,10 +491,11 @@ async function displayFirebaseRanking() {
 
 const $=id=>document.getElementById(id)||{style:{},textContent:'',innerHTML:'',value:'',classList:{add:()=>{},remove:()=>{}},appendChild:()=>{},remove:()=>{},focus:()=>{}};
 let state={score:0,level:1,prob:null,unit:"",mode:"",lvCount:0,totalQ:0,qNum:0,completed:new Set(),selectedComparison:null,selectQCount:0,startTime:null,timerInterval:null,hiddenQ:0,sessionPoints:0,selectCorrectCount:0,clearedLevels:new Set()};
-const monsters=["➗","🔢","🔲","⚖️","📝","🔀","⏰","📊","✖️","👑"];
-const lvNames=["分数÷分数","分数÷分数×分数","整数÷分数、帯分数÷分数","大小比較","式を作る問題","小数・整数・分数の混合計算","分数で表す（時間・長さ）","分数を使った文章題","分数の倍","もとにする大きさを求める"];
+const monsters=["📊","🔢","🔲","🔄","⭐","⚖️","💡","🏃","👑"];
+const lvNames=["分数×整数","分数÷整数","分数×分数","帯分数×帯分数","分数×分数×分数","大小比較","逆数","時間の分数","分数の文章題"];
 let totalPoints=0,hiddenStageAvailable=false,playerId='';
 
+// プレイヤーIDの生成と管理
 function generatePlayerId(){
     const now=new Date();
     const year=now.getFullYear();
@@ -546,6 +519,7 @@ function initializePlayerId(){
     }
 }
 
+// クリアしたレベルの管理[3]
 function loadClearedLevels(){
     try{
         const saved=localStorage.getItem('clearedLevels');
@@ -562,7 +536,7 @@ function saveClearedLevels(){
 }
 
 function updateLevelSelectDisplay(){
-    for(let i=1;i<=10;i++){
+    for(let i=1;i<=9;i++){
         const levelBtn=document.querySelector(`.level-btn:nth-child(${i})`);
         if(levelBtn){
             if(state.clearedLevels.has(i)){
@@ -574,6 +548,7 @@ function updateLevelSelectDisplay(){
     }
 }
 
+// グローバルランキングシステム（ローカル用・バックアップ）
 function saveToGlobalRanking(points){
     try{
         let globalRanking=JSON.parse(localStorage.getItem('globalRanking')||'[]');
@@ -609,6 +584,7 @@ function displayGlobalRanking(containerId,myRankId){
     const rankingList=$(containerId.replace('#','')+'List');
     rankingList.innerHTML="";
     
+    // ベスト10を表示
     const medals=["🥇","🥈","🥉"];
     for(let i=0;i<Math.min(10,globalRanking.length);i++){
         const rankDiv=document.createElement("div");
@@ -624,6 +600,7 @@ function displayGlobalRanking(containerId,myRankId){
         rankingList.appendChild(rankDiv);
     }
     
+    // 自分の順位を表示（ベスト10に入っている場合のみ）
     if(myRankId && myRank <= 10){
         const myRankDiv=$(myRankId.replace('#',''));
         myRankDiv.innerHTML=`
@@ -636,11 +613,12 @@ function displayGlobalRanking(containerId,myRankId){
     }
 }
 
+// 隠しステージの厳格な制御
 function enableHiddenStage(){hiddenStageAvailable=true;$("hiddenStageBtn").style.display="inline-block";$("hiddenModeInfo").style.display="block"}
 function disableHiddenStage(){hiddenStageAvailable=false;$("hiddenStageBtn").style.display="none";$("hiddenModeInfo").style.display="none"}
 
 try{totalPoints=parseInt(localStorage.getItem('totalPoints')||'0')}catch(e){}
-const titles={divisionMaster:{name:"分数の割り算マスター",description:"隠しステージを制覇した真の分数の割り算の達人",unlocked:false}};
+const titles={fractionMaster:{name:"分数マスター",description:"隠しステージを制覇した真の分数の達人",unlocked:false}};
 
 window.addEventListener('load',()=>{
     initializePlayerId();
@@ -651,34 +629,7 @@ window.addEventListener('load',()=>{
         $("pointsDisplay").style.display="block";
         $("totalPoints").textContent=totalPoints;
     }
-    
-    // 式の入力フィールドの変更を監視
-    ['f1n', 'f1d', 'operator', 'f2n', 'f2d'].forEach(id => {
-        $(id).addEventListener('input', updateFormulaPreview);
-        $(id).addEventListener('change', updateFormulaPreview);
-    });
 });
-
-function updateFormulaPreview() {
-    const f1n = $("f1n").value;
-    const f1d = $("f1d").value;
-    const operator = $("operator").value;
-    const f2n = $("f2n").value;
-    const f2d = $("f2d").value;
-    
-    let preview = "";
-    if (f1n && f1d) {
-        preview += `${f1n}/${f1d}`;
-    }
-    if (operator) {
-        preview += ` ${operator} `;
-    }
-    if (f2n && f2d) {
-        preview += `${f2n}/${f2d}`;
-    }
-    
-    $("formulaPreview").textContent = preview || "式がここに表示されます";
-}
 
 const gcd=(a,b)=>b?gcd(b,a%b):a;
 const R=(min,max)=>Math.floor(Math.random()*(max-min+1))+min;
@@ -689,6 +640,7 @@ function mixedFrac(w,n,d){if(n>=d){w+=Math.floor(n/d);n=n%d}return n===0?`${w}`:
 function formatAnswer(n,d,u=""){const[sn,sd]=simplify(n,d);return sd===1?sn+u:`${sn}/${sd}`+u}
 function formatTime(s){const m=Math.floor(s/60);return`${m.toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`}
 
+// ポイント計算関数[2]
 function calculateClearPoints(clearTime){
     const basePoints = 2000;
     if(clearTime<=300)return basePoints * 10;
@@ -764,41 +716,37 @@ function generateHiddenProblem(){
     const type=R(1,5);
     switch(type){
         case 1:{
-            // 複雑な分数の割り算
+            const[n1,d1]=randFrac(12,15);
+            const[n2,d2]=randFrac(12,15);
+            const[n3,d3]=randFrac(12,15);
+            const[n4,d4]=randFrac(12,15);
+            return{q:`${frac(n1,d1)} × ${frac(n2,d2)} × ${frac(n3,d3)} × ${frac(n4,d4)} =`,n:n1*n2*n3*n4,d:d1*d2*d3*d4,type:'fraction',mixed:false};
+        }
+        case 2:{
+            const w1=R(2,4),d1=R(5,8),n1=R(1,d1-1);
+            const w2=R(2,4),d2=R(5,8),n2=R(1,d2-1);
+            const w3=R(1,3),d3=R(4,6),n3=R(1,d3-1);
+            const i1=w1*d1+n1,i2=w2*d2+n2,i3=w3*d3+n3;
+            return{q:`${mixedFrac(w1,n1,d1)} × ${mixedFrac(w2,n2,d2)} × ${mixedFrac(w3,n3,d3)} =`,n:i1*i2*i3,d:d1*d2*d3,type:'fraction',mixed:true};
+        }
+        case 3:{
             const[n1,d1]=randFrac(15,20);
             const[n2,d2]=randFrac(15,20);
             const[n3,d3]=randFrac(15,20);
-            return{q:`${frac(n1,d1)} ÷ ${frac(n2,d2)} ÷ ${frac(n3,d3)} =`,n:n1*d2*d3,d:d1*n2*n3,type:'fraction',mixed:false};
-        }
-        case 2:{
-            // 帯分数を含む複雑な計算
-            const w1=R(2,4),d1=R(5,8),n1=R(1,d1-1);
-            const[n2,d2]=randFrac(12,15);
-            const i1=w1*d1+n1;
-            return{q:`${mixedFrac(w1,n1,d1)} ÷ ${frac(n2,d2)} × ${frac(n2,d2)} =`,n:i1,d:d1,type:'fraction',mixed:true};
-        }
-        case 3:{
-            // 文章題（複雑）
-            const total=R(120,200);
-            const[n1,d1]=randFrac(8,15);
-            const[n2,d2]=randFrac(8,15);
-            return{q:`${total}個のお菓子を${frac(n1,d1)}ずつ分けると何人に分けられますか？さらにその人数を${frac(n2,d2)}で割ると何人になりますか？`,n:total*d1*d2,d:n1*n2,u:"人",type:'fraction',mixed:false};
+            return{q:`${frac(n1,d1)} ÷ ${frac(n2,d2)} × ${frac(n3,d3)} =`,n:n1*d2*n3,d:d1*n2*d3,type:'fraction',mixed:false};
         }
         case 4:{
-            // 時間の複雑な計算
-            const hours=R(2,5);
-            const[n1,d1]=randFrac(8,12);
-            const[n2,d2]=randFrac(6,10);
-            return{q:`${hours}時間の${frac(n1,d1)}を${frac(n2,d2)}で割ると何分ですか？`,n:hours*60*n1*d2,d:d1*n2,u:"分",type:'fraction',mixed:false};
+            const total=R(100,200);
+            const[n1,d1]=randFrac(8,15);
+            const[n2,d2]=randFrac(8,15);
+            const remaining=total*(d1-n1)/d1;
+            return{q:`${total}個のお菓子があります。最初に全体の${frac(n1,d1)}を食べ、残りの${frac(n2,d2)}をさらに食べました。最後に残ったお菓子は何個ですか？`,n:remaining*(d2-n2),d:d2,u:"個",type:'fraction',mixed:false};
         }
         case 5:{
-            // 比較問題（複雑）
             const[n1,d1]=randFrac(20,30);
             const[n2,d2]=randFrac(20,30);
             const[n3,d3]=randFrac(20,30);
-            const left=(n1*d2*d3)/(d1*n2*n3);
-            const right=1;
-            return{q:`${frac(n1,d1)} ÷ ${frac(n2,d2)} ÷ ${frac(n3,d3)} と 1 を比べて、どちらが大きいか答えてください`,left:left,right:right,type:'comparison'};
+            return{q:`${frac(n1,d1)}、${frac(n2,d2)}、${frac(n3,d3)} の中で最も大きいものを分数で答えてください`,left:Math.max(n1*d2*d3,n2*d1*d3,n3*d1*d2),right:d1*d2*d3,type:'max_fraction'};
         }
     }
 }
@@ -807,418 +755,83 @@ function generateProblem(lv){
     if(state.mode==='hidden')return generateHiddenProblem();
     switch(lv){
         case 1:{
-            // 分数÷分数
-            const[n1,d1]=randFrac(8,12);
-            const[n2,d2]=randFrac(8,12);
-            return{q:`${frac(n1,d1)} ÷ ${frac(n2,d2)} =`,n:n1*d2,d:d1*n2,type:'fraction',mixed:false};
+            const[n,d]=randFrac(9,12);
+            const i=R(2,8);
+            return{q:`${frac(n,d)} × ${i} =`,n:n*i,d:d,type:'fraction',mixed:false};
         }
         case 2:{
-            // 分数÷分数×分数 または 分数×分数÷分数
-            const[n1,d1]=randFrac(6,10);
-            const[n2,d2]=randFrac(6,10);
-            const[n3,d3]=randFrac(6,10);
-            if(R(1,2)===1){
-                return{q:`${frac(n1,d1)} ÷ ${frac(n2,d2)} × ${frac(n3,d3)} =`,n:n1*d2*n3,d:d1*n2*d3,type:'fraction',mixed:false};
-            }else{
-                return{q:`${frac(n1,d1)} × ${frac(n2,d2)} ÷ ${frac(n3,d3)} =`,n:n1*n2*d3,d:d1*d2*n3,type:'fraction',mixed:false};
-            }
+            const[n,d]=randFrac(8,10);
+            const i=R(2,6);
+            return{q:`${frac(n,d)} ÷ ${i} =`,n:n,d:d*i,type:'fraction',mixed:false};
         }
         case 3:{
-            // 整数÷分数、帯分数÷分数など
+            const[n1,d1]=randFrac(8,12);
+            const[n2,d2]=randFrac(8,12);
+            return{q:`${frac(n1,d1)} × ${frac(n2,d2)} =`,n:n1*n2,d:d1*d2,type:'fraction',mixed:false};
+        }
+        case 4:{
+            const w1=R(1,3),d1=R(3,6),n1=R(1,d1-1);
+            const w2=R(1,2),d2=R(3,5),n2=R(1,d2-1);
+            const i1=w1*d1+n1,i2=w2*d2+n2;
+            return{q:`${mixedFrac(w1,n1,d1)} × ${mixedFrac(w2,n2,d2)} =`,n:i1*i2,d:d1*d2,type:'fraction',mixed:true};
+        }
+        case 5:{
+            const[n1,d1]=randFrac(6,8);
+            const[n2,d2]=randFrac(6,8);
+            const[n3,d3]=randFrac(6,8);
+            return{q:`${frac(n1,d1)} × ${frac(n2,d2)} × ${frac(n3,d3)} =`,n:n1*n2*n3,d:d1*d2*d3,type:'fraction',mixed:false};
+        }
+        case 6:{
+            // 改良された分数の大小比較問題
             const type=R(1,4);
             switch(type){
                 case 1:{
-                    // 整数÷分数
-                    const i=R(2,8);
-                    const[n,d]=randFrac(6,10);
-                    return{q:`${i} ÷ ${frac(n,d)} =`,n:i*d,d:n,type:'fraction',mixed:true};
+                    // 1/3 と 1/3×1/2 の比較
+                    const[n1,d1]=[1,3];
+                    const[n2,d2]=[1,2];
+                    const leftValue=n1/d1;
+                    const rightValue=(n1*n2)/(d1*d2);
+                    return{q:`次の分数を比べて、どちらが大きいか答えてください：${frac(n1,d1)} と ${frac(n1,d1)}×${frac(n2,d2)}`,left:leftValue,right:rightValue,type:'comparison'};
                 }
                 case 2:{
-                    // 帯分数÷真分数
-                    const w=R(1,3),d1=R(3,6),n1=R(1,d1-1);
-                    const[n2,d2]=randFrac(6,8);
-                    const i1=w*d1+n1;
-                    return{q:`${mixedFrac(w,n1,d1)} ÷ ${frac(n2,d2)} =`,n:i1*d2,d:d1*n2,type:'fraction',mixed:true};
+                    // 1/3×3/4 と 1/3 の比較
+                    const[n1,d1]=[1,3];
+                    const[n2,d2]=[3,4];
+                    const leftValue=(n1*n2)/(d1*d2);
+                    const rightValue=n1/d1;
+                    return{q:`次の分数を比べて、どちらが大きいか答えてください：${frac(n1,d1)}×${frac(n2,d2)} と ${frac(n1,d1)}`,left:leftValue,right:rightValue,type:'comparison'};
                 }
                 case 3:{
-                    // 真分数÷帯分数
-                    const[n1,d1]=randFrac(6,8);
-                    const w=R(1,2),d2=R(3,5),n2=R(1,d2-1);
-                    const i2=w*d2+n2;
-                    return{q:`${frac(n1,d1)} ÷ ${mixedFrac(w,n2,d2)} =`,n:n1*d2,d:d1*i2,type:'fraction',mixed:false};
+                    // 1/3 と 1/3×2 の比較
+                    const[n1,d1]=[1,3];
+                    const i=2;
+                    const leftValue=n1/d1;
+                    const rightValue=(n1*i)/d1;
+                    return{q:`次の分数を比べて、どちらが大きいか答えてください：${frac(n1,d1)} と ${frac(n1,d1)}×${i}`,left:leftValue,right:rightValue,type:'comparison'};
                 }
                 case 4:{
-                    // 帯分数÷帯分数
-                    const w1=R(1,2),d1=R(3,5),n1=R(1,d1-1);
-                    const w2=R(1,2),d2=R(3,5),n2=R(1,d2-1);
-                    const i1=w1*d1+n1,i2=w2*d2+n2;
-                    return{q:`${mixedFrac(w1,n1,d1)} ÷ ${mixedFrac(w2,n2,d2)} =`,n:i1*d2,d:d1*i2,type:'fraction',mixed:true};
-                }
-            }
-        }
-        case 4:{
-            // 大小比較（修正版：答えがランダムになるように）
-            const type=R(1,3);
-            switch(type){
-                case 1:{
-                    // 整数÷分数と整数の比較
-                    const i=R(3,6);
-                    const[n,d]=randFrac(6,10);
-                    const leftValue=i*d/n;
-                    const rightValue=i;
-                    const questionType=R(1,2)===1?"大きい":"小さい";
-                    return{q:`${i} ÷ ${frac(n,d)} と ${i} を比べて、どちらが${questionType}か答えてください`,left:leftValue,right:rightValue,type:'comparison',questionType:questionType};
-                }
-                case 2:{
-                    // 分数÷分数と分数の比較
-                    const[n1,d1]=randFrac(6,10);
-                    const[n2,d2]=randFrac(6,10);
-                    const leftValue=(n1*d2)/(d1*n2);
-                    const rightValue=n1/d1;
-                    const questionType=R(1,2)===1?"大きい":"小さい";
-                    return{q:`${frac(n1,d1)} ÷ ${frac(n2,d2)} と ${frac(n1,d1)} を比べて、どちらが${questionType}か答えてください`,left:leftValue,right:rightValue,type:'comparison',questionType:questionType};
-                }
-                case 3:{
-                    // 整数÷分数と整数の比較（別パターン）
-                    const i=R(4,8);
-                    const[n,d]=randFrac(8,12);
-                    const leftValue=i*d/n;
-                    const rightValue=i;
-                    const questionType=R(1,2)===1?"大きい":"小さい";
-                    return{q:`${i} ÷ ${frac(n,d)} と ${i} を比べて、どちらが${questionType}か答えてください`,left:leftValue,right:rightValue,type:'comparison',questionType:questionType};
-                }
-            }
-        }
-        case 5:{
-            // 式を作る問題（修正版：正しい答えの設定）
-            const type=R(1,2);
-            switch(type){
-                case 1:{
-                    // ホース問題（修正版：正しい答えの設定）
-                    const[n1,d1]=randFrac(6,10);
-                    const[n2,d2]=randFrac(6,10);
-                    const unit1=R(1,2)===1?"m":"L";
-                    const unit2="kg";
-                    const question=R(1,2)===1?"１"+unit1+"の重さを求めましょう":"１"+unit2+"の長さを求めましょう";
-                    if(question.includes("重さを求めましょう")){
-                        // n1/d1 unit1の重さがn2/d2 kg → 1unit1の重さ = n2/d2 ÷ n1/d1
-                        return{q:`${frac(n1,d1)}${unit1}の重さが${frac(n2,d2)}${unit2}のホースがあります。${question}`,correctFormula:{n1:n2,d1:d2,op:"÷",n2:n1,d2:d1},type:'formula'};
-                    }else{
-                        // n1/d1 unit1の重さがn2/d2 kg → 1kgの長さ = n1/d1 ÷ n2/d2
-                        return{q:`${frac(n1,d1)}${unit1}の重さが${frac(n2,d2)}${unit2}のホースがあります。${question}`,correctFormula:{n1:n1,d1:d1,op:"÷",n2:n2,d2:d2},type:'formula'};
-                    }
-                }
-                case 2:{
-                    // 米の重さ問題（修正版：正しい答えの設定）
-                    const[n1,d1]=randFrac(6,10);
-                    const[n2,d2]=randFrac(6,10);
-                    const question=R(1,2)===1?"１Ｌの重さを求めましょう":"１ｋｇのかさを求めましょう";
-                    if(question==="１Ｌの重さを求めましょう"){
-                        // 米n1/d1Lの重さがn2/d2kg → 1Lの重さ = n2/d2 ÷ n1/d1
-                        return{q:`米${frac(n1,d1)}Lの重さを量ったら${frac(n2,d2)}ｋｇでした。${question}`,correctFormula:{n1:n2,d1:d2,op:"÷",n2:n1,d2:d1},type:'formula'};
-                    }else{
-                        // 米n1/d1Lの重さがn2/d2kg → 1kgのかさ = n1/d1 ÷ n2/d2
-                        return{q:`米${frac(n1,d1)}Lの重さを量ったら${frac(n2,d2)}ｋｇでした。${question}`,correctFormula:{n1:n1,d1:d1,op:"÷",n2:n2,d2:d2},type:'formula'};
-                    }
-                }
-            }
-        }
-        case 6:{
-            // 小数÷分数×整数のような混合計算
-            const type=R(1,3);
-            switch(type){
-                case 1:{
-                    // 小数÷分数×整数
-                    const decimal=(R(10,50)/10);
-                    const[n,d]=randFrac(6,10);
-                    const integer=R(2,6);
-                    return{q:`${decimal} ÷ ${frac(n,d)} × ${integer} =`,n:decimal*d*integer*10,d:n*10,type:'fraction',mixed:false};
-                }
-                case 2:{
-                    // 整数×分数÷小数
-                    const integer=R(3,8);
-                    const[n,d]=randFrac(6,10);
-                    const decimal=(R(10,30)/10);
-                    return{q:`${integer} × ${frac(n,d)} ÷ ${decimal} =`,n:integer*n*10,d:d*decimal*10,type:'fraction',mixed:false};
-                }
-                case 3:{
-                    // 分数×小数÷整数
-                    const[n,d]=randFrac(6,10);
-                    const decimal=(R(10,40)/10);
-                    const integer=R(2,5);
-                    return{q:`${frac(n,d)} × ${decimal} ÷ ${integer} =`,n:n*decimal*10,d:d*integer*10,type:'fraction',mixed:false};
+                    // 通常の分数比較
+                    const[n1,d1]=randFrac(8,12);
+                    const[n2,d2]=randFrac(8,12);
+                    return{q:`次の分数を比べて、どちらが大きいか答えてください：${frac(n1,d1)} と ${frac(n2,d2)}`,left:n1*d2,right:n2*d1,type:'comparison'};
                 }
             }
         }
         case 7:{
-            // 分数で表しましょう
-            const type=R(1,4);
-            switch(type){
-                case 1:{
-                    // 7秒は何分ですか？
-                    const seconds=R(5,50);
-                    return{q:`${seconds}秒は何分ですか？`,n:seconds,d:60,u:"分",type:'fraction',mixed:false};
-                }
-                case 2:{
-                    // 6分は何時間ですか？
-                    const minutes=R(5,50);
-                    return{q:`${minutes}分は何時間ですか？`,n:minutes,d:60,u:"時間",type:'fraction',mixed:false};
-                }
-                case 3:{
-                    // 3時間は何日ですか？
-                    const hours=R(2,20);
-                    return{q:`${hours}時間は何日ですか？`,n:hours,d:24,u:"日",type:'fraction',mixed:false};
-                }
-                case 4:{
-                    // 2時間20分は何時間ですか？
-                    const hours=R(1,3);
-                    const minutes=R(10,50);
-                    const totalMinutes=hours*60+minutes;
-                    return{q:`${hours}時間${minutes}分は何時間ですか？`,n:totalMinutes,d:60,u:"時間",type:'fraction',mixed:true};
-                }
-            }
+            const[n,d]=randFrac(8,12);
+            return{q:`${frac(n,d)} の逆数は？`,n:d,d:n,type:'fraction',mixed:false};
         }
         case 8:{
-            // 分数を使った文章題（修正版：約分しやすい数字を使用し、時計問題を追加）
-            const type=R(1,3);
-            switch(type){
-                case 1:{
-                    // マラソン問題（約分しやすい数字を使用）
-                    const distance=[24,30,36,42,48,54,60][R(0,6)]; // 約分しやすい距離
-                    const hours=R(2,4);
-                    const minutes=[15,20,30,40,45][R(0,4)]; // 約分しやすい分数になる分を選択
-                    const totalMinutes=hours*60+minutes;
-                    return{q:`マラソンで${distance}ｋｍを${hours}時間${minutes}分で走りました。時速何ｋｍですか？`,n:distance*60,d:totalMinutes,u:"ｋｍ",type:'fraction',mixed:false};
-                }
-                case 2:{
-                    // 一般的な速度問題（約分しやすい数字を使用）
-                    const distance=[24,30,36,42,48,54,60][R(0,6)]; // 約分しやすい距離
-                    const hours=R(1,3);
-                    const minutes=[12,15,18,20,24,30,36,40,45][R(0,8)]; // 約分しやすい分数になる分
-                    const totalMinutes=hours*60+minutes;
-                    return{q:`${distance}ｋｍを${hours}時間${minutes}分で移動しました。時速何ｋｍですか？`,n:distance*60,d:totalMinutes,u:"ｋｍ",type:'fraction',mixed:false};
-                }
-                case 3:{
-                    // 時計の進み方問題（新規追加）
-                    const progressSeconds=[6,8,10,12,15,18,20,24][R(0,7)]; // 約分しやすい秒数
-                    const targetMinutes=[6,8,10,12,15,18,20,24][R(0,7)]; // 約分しやすい分数
-                    // progressSeconds秒を分数で表すと progressSeconds/60 分
-                    // targetMinutes分進むのに必要な日数 = targetMinutes ÷ (progressSeconds/60) = targetMinutes × 60 ÷ progressSeconds
-                    const answerNumerator=targetMinutes*60;
-                    const answerDenominator=progressSeconds;
-                    return{q:`1日に${progressSeconds}秒ずつ進む時計があります。この時計は何日で${targetMinutes}分進みますか？${progressSeconds}秒を分数で表して計算して答えましょう。`,n:answerNumerator,d:answerDenominator,u:"日",type:'fraction',mixed:false};
-                }
-            }
+            const hours=R(1,3);
+            const[n,d]=randFrac(6,12);
+            return{q:`${hours}時間の${frac(n,d)}は何分ですか？`,n:hours*60*n,d:d,u:"分",type:'fraction',mixed:false};
         }
         case 9:{
-            // 分数の倍
-            const type=R(1,2);
-            switch(type){
-                case 1:{
-                    // リボンの倍数問題
-                    const[n1,d1]=randFrac(6,10);
-                    const[n2,d2]=randFrac(6,10);
-                    return{q:`赤いリボンは${frac(n1,d1)}ｍです。青いリボンは${frac(n2,d2)}ｍです。青いリボンは赤いリボンの何倍ですか？`,n:n2*d1,d:d2*n1,u:"倍",type:'fraction',mixed:false};
-                }
-                case 2:{
-                    // 一般的な倍数問題
-                    const[n1,d1]=randFrac(6,10);
-                    const[n2,d2]=randFrac(6,10);
-                    const item=["ひも","テープ","板"][R(0,2)];
-                    return{q:`Aの${item}は${frac(n1,d1)}ｍです。Bの${item}は${frac(n2,d2)}ｍです。Bの${item}はAの${item}の何倍ですか？`,n:n2*d1,d:d2*n1,u:"倍",type:'fraction',mixed:false};
-                }
-            }
-        }
-        case 10:{
-            // もとにする大きさを求める問題
-            const type=R(1,2);
-            switch(type){
-                case 1:{
-                    // 本と雑誌の問題
-                    const price=R(600,1200);
-                    const[n,d]=randFrac(6,10);
-                    return{q:`${price}円の本を買いました。この本の値段は雑誌の値段の${frac(n,d)}倍です。雑誌の値段を求めましょう。`,n:price*d,d:n,u:"円",type:'fraction',mixed:false};
-                }
-                case 2:{
-                    // 一般的なもとの量問題
-                    const amount=R(200,800);
-                    const[n,d]=randFrac(6,10);
-                    const item=["ペン","ノート","消しゴム"][R(0,2)];
-                    return{q:`${amount}円の${item}を買いました。この${item}の値段は別の商品の${frac(n,d)}倍です。別の商品の値段を求めましょう。`,n:amount*d,d:n,u:"円",type:'fraction',mixed:false};
-                }
-            }
+            const total=R(20,40);
+            const[n,d]=randFrac(6,12);
+            return{q:`${total}個のりんごの${frac(n,d)}を食べました。残りは何個ですか？`,n:total*(d-n),d:d,u:"個",type:'fraction',mixed:false};
         }
     }
-}
-
-// 修正された selectLevel 関数
-function selectLevel(level){
-    state.level = level; // レベルを正しく設定
-    state.score = 0;
-    state.lvCount = 0;
-    state.totalQ = 0;
-    state.qNum = 0;
-    state.selectQCount = 0;
-    state.selectCorrectCount = 0;
-    state.sessionPoints = 0;
-    
-    $("start").style.display = "none";
-    $("levelSelect").style.display = "none";
-    $("game").style.display = "block";
-    
-    state.mode = 'select';
-    $("levelSelectBtn").style.display = "inline-block";
-    $("selectQ").style.display = "inline-block";
-    $("totalQ").style.display = "none";
-    $("hiddenQ").style.display = "none";
-    $("modeDisplay").innerHTML = `<div class="mode-info select"><strong>🎮 選べるモード</strong> - レベル${state.level}</div>`;
-    $("progressBar").className = "progress-bar select";
-    
-    updateLevelIndicator();
-    updateProgressBar();
-    newProblem();
-}
-
-function selectMode(mode){
-    state.mode=mode;
-    state.score=0;
-    state.level=1; // 練習モード等では1から開始
-    state.lvCount=0;
-    state.totalQ=0;
-    state.qNum=0;
-    state.selectQCount=0;
-    state.hiddenQ=0;
-    state.selectCorrectCount=0;
-    state.sessionPoints=0;
-    
-    $("start").style.display="none";
-    $("levelSelect").style.display="none";
-    $("game").style.display="block";
-    
-    if(mode==='select'){
-        // 選べるモードの場合はレベル選択画面に戻る
-        $("game").style.display="none";
-        showLevelSelect();
-        return;
-    }else if(mode==='practice'){
-        $("levelSelectBtn").style.display="none";
-        $("selectQ").style.display="none";
-        $("totalQ").style.display="none";
-        $("hiddenQ").style.display="none";
-        $("modeDisplay").innerHTML='<div class="mode-info practice"><strong>📚 練習モード</strong></div>';
-        $("progressBar").className="progress-bar practice";
-    }else if(mode==='summary'){
-        $("levelSelectBtn").style.display="none";
-        $("selectQ").style.display="none";
-        $("totalQ").style.display="inline-block";
-        $("hiddenQ").style.display="none";
-        $("modeDisplay").innerHTML='<div class="mode-info summary"><strong>🎯 まとめモード</strong></div>';
-        $("progressBar").className="progress-bar summary";
-        startTimer();
-    }else if(mode==='hidden'){
-        $("levelSelectBtn").style.display="none";
-        $("selectQ").style.display="none";
-        $("totalQ").style.display="none";
-        $("hiddenQ").style.display="inline-block";
-        $("modeDisplay").innerHTML='<div class="mode-info hidden"><strong>👑 隠しステージ</strong></div>';
-        $("progressBar").className="progress-bar hidden";
-        startTimer();
-    }
-    
-    updateLevelIndicator();
-    updateProgressBar();
-    newProblem();
-}
-
-function showLevelSelect(){
-    $("start").style.display="none";
-    $("levelSelect").style.display="block";
-    updateLevelSelectDisplay();
-}
-
-function backToStart(){
-    $("game").style.display="none";
-    $("gameover").style.display="none";
-    $("clear").style.display="none";
-    $("levelClear").style.display="none";
-    $("hiddenClear").style.display="none";
-    $("levelSelect").style.display="none";
-    $("start").style.display="block";
-    stopTimer();
-    
-    if(state.sessionPoints>0){
-        $("sessionPoints").style.display="block";
-    }
-}
-
-function backToLevelSelect(){
-    $("game").style.display="none";
-    $("levelClear").style.display="none";
-    showLevelSelect();
-}
-
-function updateLevelIndicator(){
-    const indicator=$("levelIndicator");
-    indicator.innerHTML="";
-    
-    if(state.mode==='practice'){
-        for(let i=1;i<=10;i++){
-            const dot=document.createElement("div");
-            dot.className="level-dot";
-            if(state.completed.has(i))dot.classList.add("completed");
-            if(i===state.level)dot.classList.add("current");
-            dot.textContent=i;
-            indicator.appendChild(dot);
-        }
-    }else if(state.mode==='summary'){
-        for(let i=1;i<=10;i++){
-            const dot=document.createElement("div");
-            dot.className="level-dot";
-            if(i<state.level||(i===state.level&&state.totalQ%5===0&&state.totalQ>0))dot.classList.add("completed");
-            if(i===state.level)dot.classList.add("current");
-            dot.textContent=i;
-            indicator.appendChild(dot);
-        }
-    }else if(state.mode==='hidden'){
-        for(let i=1;i<=10;i++){
-            const dot=document.createElement("div");
-            dot.className="level-dot";
-            if(i<=state.hiddenQ)dot.classList.add("completed");
-            if(i===state.hiddenQ+1)dot.classList.add("current");
-            dot.textContent=i;
-            indicator.appendChild(dot);
-        }
-    }else if(state.mode==='select'){
-        for(let i=1;i<=10;i++){
-            const dot=document.createElement("div");
-            dot.className="level-dot";
-            if(i<=state.selectCorrectCount)dot.classList.add("completed");
-            if(i===state.selectCorrectCount+1)dot.classList.add("current");
-            dot.textContent=i;
-            indicator.appendChild(dot);
-        }
-    }
-}
-
-function updateProgressBar(){
-    const progressBar=$("progressBar");
-    let progress=0;
-    
-    if(state.mode==='practice'){
-        progress=(state.lvCount/5)*100;
-        $("levelProgress").textContent=`このレベル: ${state.lvCount}/5問正解`;
-    }else if(state.mode==='summary'){
-        progress=(state.totalQ/50)*100;
-        $("levelProgress").textContent="";
-    }else if(state.mode==='hidden'){
-        progress=(state.hiddenQ/10)*100;
-        $("levelProgress").textContent="";
-    }else if(state.mode==='select'){
-        progress=(state.selectCorrectCount/10)*100;
-        $("levelProgress").textContent=`連続正解: ${state.selectCorrectCount}/10問`;
-    }
-    
-    progressBar.style.width=progress+"%";
 }
 
 function newProblem(){
@@ -1250,61 +863,194 @@ function newProblem(){
     $("mn").value="";
     $("md").value="";
     $("norm").value="";
-    $("f1n").value="";
-    $("f1d").value="";
-    $("operator").value="";
-    $("f2n").value="";
-    $("f2d").value="";
     
     // 表示の制御
     if(state.prob.type==='comparison'){
         $("answerSections").style.display="none";
-        $("formulaSection").style.display="none";
         $("comparisonInput").style.display="block";
         state.selectedComparison=null;
         document.querySelectorAll('.comparison-btn').forEach(btn=>btn.classList.remove('selected'));
-    }else if(state.prob.type==='formula'){
-        $("answerSections").style.display="none";
-        $("comparisonInput").style.display="none";
-        $("formulaSection").style.display="flex";
-        updateFormulaPreview();
     }else{
         $("answerSections").style.display="flex";
-        $("formulaSection").style.display="none";
         $("comparisonInput").style.display="none";
         $("mixedSection").style.display=state.prob.mixed?"block":"none";
     }
     
     $("wrong").style.display="none";
     
-    // カーソル位置を適切な入力欄に設定
+    // カーソル位置を分母に設定
     setTimeout(() => {
-        if(state.prob.type==='formula'){
-            $("f1n").focus();
-        }else if(state.prob.type!=='comparison'){
+        if(state.prob.type!=='comparison'){
             $("d").focus();
         }
     }, 100);
 }
 
-// 残りの関数は前回出力したコードと同じです...
-function submitFormula(){
-    const f1n=parseInt($("f1n").value);
-    const f1d=parseInt($("f1d").value);
-    const operator=$("operator").value;
-    const f2n=parseInt($("f2n").value);
-    const f2d=parseInt($("f2d").value);
+function selectMode(mode){
+    state.mode=mode;
+    state.score=0;
+    state.level=1;
+    state.lvCount=0;
+    state.totalQ=0;
+    state.qNum=0;
+    state.hiddenQ=0;
+    state.sessionPoints=0;
+    state.completed=new Set();
+    state.selectCorrectCount=0;
     
-    if(isNaN(f1n)||isNaN(f1d)||!operator||isNaN(f2n)||isNaN(f2d)){
-        alert('すべての項目を入力してください');
+    if(mode==='hidden'&&!hiddenStageAvailable){
+        alert('隠しステージはまとめモードをクリアすると解放されます！');
         return;
     }
     
-    const correct=state.prob.correctFormula;
-    if(f1n===correct.n1&&f1d===correct.d1&&operator===correct.op&&f2n===correct.n2&&f2d===correct.d2){
-        handleCorrect();
+    $("start").style.display="none";
+    $("levelSelect").style.display="none";
+    $("game").style.display="block";
+    
+    updateLevelIndicator();
+    updateProgressBar();
+    updateModeDisplay();
+    
+    if(mode==='select'){
+        $("levelSelectBtn").style.display="inline-block";
+        $("selectQ").style.display="inline";
     }else{
-        handleWrong(`${correct.n1}/${correct.d1} ${correct.op} ${correct.n2}/${correct.d2}`);
+        $("levelSelectBtn").style.display="none";
+        $("selectQ").style.display="none";
+    }
+    
+    if(mode==='summary'){
+        $("totalQ").style.display="inline";
+    }else if(mode==='hidden'){
+        $("hiddenQ").style.display="inline";
+    }else{
+        $("totalQ").style.display="none";
+        $("hiddenQ").style.display="none";
+    }
+    
+    startTimer();
+    newProblem();
+}
+
+// 修正：選択されたレベルを正しく設定し、選択モードで開始
+function selectLevel(level){
+    $("start").style.display="none";
+    $("levelSelect").style.display="none";
+    $("game").style.display="block";
+    
+    // 選択モードの初期化
+    state.mode='select';
+    state.score=0;
+    state.level=level; // 重要：選択されたレベルを設定
+    state.lvCount=0;
+    state.totalQ=0;
+    state.qNum=0;
+    state.hiddenQ=0;
+    state.sessionPoints=0;
+    state.completed=new Set();
+    state.selectCorrectCount=0;
+    
+    updateLevelIndicator();
+    updateProgressBar();
+    updateModeDisplay();
+    
+    $("levelSelectBtn").style.display="inline-block";
+    $("selectQ").style.display="inline";
+    $("totalQ").style.display="none";
+    $("hiddenQ").style.display="none";
+    
+    newProblem();
+}
+
+function showLevelSelect(){
+    loadClearedLevels();
+    updateLevelSelectDisplay();
+    $("start").style.display="none";
+    $("levelSelect").style.display="block";
+}
+
+function backToStart(){
+    stopTimer();
+    $("start").style.display="block";
+    $("levelSelect").style.display="none";
+    $("game").style.display="none";
+    $("gameover").style.display="none";
+    $("clear").style.display="none";
+    $("hiddenClear").style.display="none";
+    $("levelClear").style.display="none";
+}
+
+function backToLevelSelect(){
+    loadClearedLevels();
+    updateLevelSelectDisplay();
+    $("levelSelect").style.display="block";
+    $("game").style.display="none";
+    $("levelClear").style.display="none";
+}
+
+function updateLevelIndicator(){
+    const indicator=$("levelIndicator");
+    indicator.innerHTML="";
+    
+    if(state.mode==='hidden'){
+        for(let i=1;i<=10;i++){
+            const dot=document.createElement("div");
+            dot.className="level-dot";
+            dot.textContent=i;
+            if(i<=state.hiddenQ)dot.classList.add("completed");
+            if(i===state.hiddenQ+1)dot.classList.add("current");
+            indicator.appendChild(dot);
+        }
+    }else{
+        for(let i=1;i<=9;i++){
+            const dot=document.createElement("div");
+            dot.className="level-dot";
+            dot.textContent=i;
+            if(state.completed.has(i))dot.classList.add("completed");
+            if(i===state.level)dot.classList.add("current");
+            indicator.appendChild(dot);
+        }
+    }
+}
+
+function updateProgressBar(){
+    const progressBar=$("progressBar");
+    progressBar.className=`progress-bar ${state.mode}`;
+    
+    if(state.mode==='practice'){
+        const progress=(state.lvCount/5)*100;
+        progressBar.style.width=progress+"%";
+        $("levelProgress").textContent=`このレベル: ${state.lvCount}/5問正解`;
+    }else if(state.mode==='summary'){
+        const progress=(state.totalQ/45)*100;
+        progressBar.style.width=progress+"%";
+        $("levelProgress").textContent=`全体進捗: ${state.totalQ}/45問`;
+    }else if(state.mode==='hidden'){
+        const progress=(state.hiddenQ/10)*100;
+        progressBar.style.width=progress+"%";
+        $("levelProgress").textContent=`隠しステージ: ${state.hiddenQ}/10問`;
+    }else{
+        const progress=(state.selectCorrectCount/10)*100;
+        progressBar.style.width=progress+"%";
+        $("levelProgress").textContent=`連続正解: ${state.selectCorrectCount}/10問`;
+    }
+}
+
+function updateModeDisplay(){
+    const modeDisplay=$("modeDisplay");
+    switch(state.mode){
+        case 'practice':
+            modeDisplay.innerHTML='<div class="mode-info practice"><strong>📚 練習モード</strong><br>5問連続正解でレベルアップ！</div>';
+            break;
+        case 'summary':
+            modeDisplay.innerHTML='<div class="mode-info summary"><strong>🎯 まとめモード</strong><br>全45問ノーミスでクリア！</div>';
+            break;
+        case 'select':
+            modeDisplay.innerHTML='<div class="mode-info select"><strong>🎮 選択モード</strong><br>10問連続正解でレベルクリア！</div>';
+            break;
+        case 'hidden':
+            modeDisplay.innerHTML='<div class="mode-info hidden"><strong>👑 隠しステージ</strong><br>超高難度の分数問題に挑戦！</div>';
+            break;
     }
 }
 
@@ -1321,29 +1067,15 @@ function submitComparison(){
     }
     
     let correct=false;
-    const questionType=state.prob.questionType||"大きい";
-    
-    if(questionType==="大きい"){
-        if(state.selectedComparison==='left'&&state.prob.left>state.prob.right)correct=true;
-        if(state.selectedComparison==='right'&&state.prob.left<state.prob.right)correct=true;
-        if(state.selectedComparison==='equal'&&state.prob.left===state.prob.right)correct=true;
-    }else{
-        if(state.selectedComparison==='left'&&state.prob.left<state.prob.right)correct=true;
-        if(state.selectedComparison==='right'&&state.prob.left>state.prob.right)correct=true;
-        if(state.selectedComparison==='equal'&&state.prob.left===state.prob.right)correct=true;
-    }
+    if(state.selectedComparison==='left'&&state.prob.left>state.prob.right)correct=true;
+    if(state.selectedComparison==='right'&&state.prob.left<state.prob.right)correct=true;
+    if(state.selectedComparison==='equal'&&state.prob.left===state.prob.right)correct=true;
     
     if(correct){
         handleCorrect();
     }else{
-        let correctAnswer;
-        if(questionType==="大きい"){
-            correctAnswer=state.prob.left>state.prob.right?'左がわ':
-                         state.prob.left<state.prob.right?'右がわ':'同じ';
-        }else{
-            correctAnswer=state.prob.left<state.prob.right?'左がわ':
-                         state.prob.left>state.prob.right?'右がわ':'同じ';
-        }
+        const correctAnswer=state.prob.left>state.prob.right?'左がわ':
+                          state.prob.left<state.prob.right?'右がわ':'同じ';
         handleWrong(correctAnswer);
     }
 }
@@ -1455,7 +1187,7 @@ async function handleCorrect(){
             $("monster").classList.add("level-up");
             setTimeout(()=>$("monster").classList.remove("level-up"),3000);
             
-            if(state.level<10){
+            if(state.level<9){
                 state.level++;
                 state.lvCount=0;
             }else{
@@ -1468,7 +1200,7 @@ async function handleCorrect(){
         }
     }else if(state.mode==='summary'){
         state.totalQ++;
-        if(state.totalQ>=50){
+        if(state.totalQ>=45){
             stopTimer();
             const clearTime=getElapsedTime();
             enableHiddenStage();
@@ -1525,7 +1257,7 @@ function handleWrong(correctAnswer){
         $("practiceMsg").style.display="none";
         $("selectMsg").style.display="block";
         $("backToSelectBtn").style.display="inline-block";
-        state.selectCorrectCount=0;
+        state.selectCorrectCount=0; // 選択モードで間違えたら連続正解カウントをリセット
     }
     
     $("monster").classList.add("wrong");
@@ -1539,8 +1271,10 @@ function retry(){
     newProblem();
 }
 
+// 修正：選択モードでは同じレベルの次の問題を出題
 function next(){
     $("wrong").style.display="none";
+    // 選択モードでは「つぎへ」ボタンでレベルを変更しない
     newProblem();
 }
 
@@ -1601,7 +1335,7 @@ async function showHiddenClear(){
     $("hiddenFinalScore").textContent=state.score;
     
     createMasterFireworks();
-    unlockTitle('divisionMaster');
+    unlockTitle('fractionMaster');
     
     const hiddenPoints=3000;
     $("hiddenPointsEarned").style.display="block";
@@ -1689,8 +1423,6 @@ document.addEventListener('keydown',function(e){
     if(e.key==='Enter'&&$("game").style.display==="block"){
         if($("comparisonInput").style.display==="block"){
             submitComparison();
-        }else if($("formulaSection").style.display==="flex"){
-            submitFormula();
         }else if($("n").value&&$("d").value){
             submitFraction();
         }else if($("norm").value){
