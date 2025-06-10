@@ -1434,7 +1434,6 @@ document.addEventListener('keydown',function(e){
 </body>
 </html>
 
-
 <!-- 手書き計算スペース（常時表示） -->
 <div id="handwritingSpace" style="margin-top:40px;padding:20px;background:#f0f8ff;border-radius:15px;border:3px solid #2196f3">
 <div class="info">
@@ -1442,10 +1441,11 @@ document.addEventListener('keydown',function(e){
 <p style="margin:0 0 15px 0;color:#666">マウスや指で自由に計算式や図を書けます</p>
 </div>
 <div style="background:white;border-radius:10px;padding:20px;border:2px solid #2196f3">
-<canvas id="drawArea" width="800" height="500" style="border:2px solid #2196f3;border-radius:8px;background:#fff;touch-action:none;display:block;margin:0 auto;cursor:crosshair"></canvas>
-<div style="margin-top:15px;text-align:center">
+<!-- クリアボタンを上部に移動 -->
+<div style="margin-bottom:15px;text-align:center">
 <button onclick="clearDrawCanvas()" style="background:#ff9800;color:white;border:none;padding:10px 20px;border-radius:6px;margin:5px;cursor:pointer;font-size:14px">🗑️ クリア</button>
 </div>
+<canvas id="drawArea" width="800" height="500" style="border:2px solid #2196f3;border-radius:8px;background:#fff;touch-action:none;display:block;margin:0 auto;cursor:crosshair"></canvas>
 <div style="font-size:14px;color:#666;margin-top:15px;text-align:center;background:#f8f9fa;padding:10px;border-radius:6px">
 💡 ヒント: 筆算や図を描いて問題を解いてみましょう！小数の位取りや計算過程を書くと理解が深まります。
 </div>
@@ -1592,5 +1592,3 @@ function manualInitDraw() {
   initDrawingSpace();
 }
 </script>
-
-
